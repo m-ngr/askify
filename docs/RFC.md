@@ -37,3 +37,66 @@
   - [ ] pagination
   - [ ] single user profile
   - [ ] only users I follow
+
+## Database Design
+
+**Note:** This is an inital design and may change at the development phase or may require further refinement.
+
+### Users
+
+| Field          | Type     |
+| -------------- | -------- |
+| ID             | ObjectId |
+| firstName      | String   |
+| lastName       | String   |
+| username       | String   |
+| email          | String   |
+| password       | String   |
+| avatar         | String   |
+| bio            | String   |
+| allowAnonymous | Boolean  |
+| categories     | [String] |
+| followers      | Number   |
+| following      | Number   |
+
+### Questions
+
+| Field       | Type     |
+| ----------- | -------- |
+| ID          | ObjectId |
+| fromUser    | ObjectId |
+| toUser      | ObjectId |
+| question    | String   |
+| answer      | String   |
+| isAnonymous | Boolean  |
+| category    | String   |
+| createdAt   | Date     |
+| answeredAt  | Date     |
+| likes       | Number   |
+| comments    | Number   |
+
+### Comments
+
+| Field      | Type     |
+| ---------- | -------- |
+| ID         | ObjectId |
+| questionID | ObjectId |
+| userID     | ObjectId |
+| content    | String   |
+| createdAt  | Date     |
+
+### Likes
+
+| Field      | Type     |
+| ---------- | -------- |
+| ID         | ObjectId |
+| questionID | ObjectId |
+| userID     | ObjectId |
+
+### Followers
+
+| Field      | Type     |
+| ---------- | -------- |
+| ID         | ObjectId |
+| userID     | ObjectId |
+| followerID | ObjectId |
