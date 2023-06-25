@@ -38,9 +38,9 @@
   - [ ] single user profile
   - [ ] only users I follow
 
-## Database Design
+## Database Design Overview
 
-**Note:** This is an inital design and may change at the development phase or may require further refinement.
+> :warning: This is a preliminary incomplete design, and it's likely to change and evolve during the development phase.
 
 ### Users
 
@@ -100,3 +100,73 @@
 | ID         | ObjectId |
 | userID     | ObjectId |
 | followerID | ObjectId |
+
+## API Design Overview
+
+> :warning: This is a preliminary incomplete design, and it's likely to change and evolve during the development phase.
+
+### Auth
+
+- Mount point: / (root)
+
+| Method | Endpoint | Function         |
+| ------ | -------- | ---------------- |
+| POST   | /signup  | Create new user  |
+| POST   | /login   | Log the user in  |
+| POST   | /logout  | Log the user out |
+
+### Users
+
+- Mount point: /users/
+
+| Method | Endpoint            | Function                                  |
+| ------ | ------------------- | ----------------------------------------- |
+| GET    | /                   | Search users                              |
+| GET    | /profiles/:username | get profile info                          |
+| GET    | /:id                | get user info                             |
+| PATCH  | /:id                | update user info                          |
+| DELETE | /:id                | delete user                               |
+| GET    | /:id/inbox          | get unanswered questions in inbox         |
+| POST   | /:id/inbox          | ask this user a question in inbox         |
+| GET    | /:id/answers        | get answered questions                    |
+| GET    | /:id/following      | get the users that this user is following |
+| GET    | /:id/followers      | get the users that follows this user      |
+| POST   | /:id/followers      | follow this user                          |
+| DELETE | /:id/followers      | unfollow this user                        |
+
+### Questions
+
+- Mount point: /questions/
+
+| Method | Endpoint      | Function                             |
+| ------ | ------------- | ------------------------------------ |
+| GET    | /             | Search questions                     |
+| POST   | /             | Ask a question to user               |
+| GET    | /:id          | read a question                      |
+| PATCH  | /:id          | edit the answer                      |
+| DELETE | /:id          | delete the question                  |
+| GET    | /:id/comments | get comments on this question        |
+| POST   | /:id/comments | add a comment to this question       |
+| `GET`  | /:id/likes    | get all users who liked the question |
+| POST   | /:id/likes    | like the question                    |
+| DELETE | /:id/likes    | unlike the question                  |
+
+### Comments
+
+- Mount point: /comments/
+
+| Method | Endpoint | Function                 |
+| ------ | -------- | ------------------------ |
+| PATCH  | /:id     | edit the comment?        |
+| DELETE | /:id     | delete the comment, who? |
+
+### Category
+
+- Mount point: /category/
+
+| Method | Endpoint | Function                         |
+| ------ | -------- | -------------------------------- |
+| POST   | /        | create new category              |
+| GET    | /:name   | get all question in the category |
+| PUT    | /:name   | rename the category              |
+| DELETE | /:name   | delete the category              |
