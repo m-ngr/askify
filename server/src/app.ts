@@ -1,13 +1,29 @@
 require("dotenv").config();
 import "./types";
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+import routes from "./routes";
+import { trimmer } from "./middlewares/trimmer";
 
 const port = process.env.PORT || 4000;
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.use(trimmer);
+app.use(routes);
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  return res.status(404).json({ error: "404 Not Found" });
+});
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error(err);
+  return res.status(500).json({ error: "Internal server error" });
+});
 
 mongoose
   .connect(process.env.MONGO_URI!)
