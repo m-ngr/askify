@@ -1,13 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 
 export function trimmer(req: Request, res: Response, next: NextFunction) {
-  if (req.body) {
-    for (let key in req.body) {
-      if (typeof req.body[key] === "string") {
-        req.body[key] = req.body[key].trim();
-      }
+  if (req.body) trimStrings(req.body);
+  next();
+}
+
+function trimStrings(obj: any) {
+  if (typeof obj !== "object") return;
+
+  for (let key in obj) {
+    if (typeof obj[key] === "string") {
+      obj[key] = obj[key].trim();
+    } else {
+      trimStrings(obj[key]);
     }
   }
-
-  next();
 }
