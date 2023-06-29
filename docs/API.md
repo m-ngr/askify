@@ -330,46 +330,69 @@
 
 ## Category Endpoints
 
-### Add New Category
+### Create New Category
 
 - **Endpoint:** `/category`
 - **Method:** `POST`
 - **Headers:**
   - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
-  - `name` (string): Name of the new category to add.
+  - `category`: The name of the category to be created.
 - **Response:**
-  - `201 Created` status code, Category successfully added.
-  - `message` (string): Success message confirming the category addition.
+  - `201 Created` status code if the category is created successfully.
+  - `400 Bad Request` status code if the request is invalid or the category is empty.
+  - `409 Conflict` status code if the category already exists for the user.
+  - `401 Unauthorized` status code if user authentication fails.
+- **Response Body (Success):**
+  - `message`: A success message indicating that the category was created successfully.
+  - `categories`: An array of categories belonging to the user, including the newly created category.
+- **Response Body (Error):**
+  - `error`: A descriptive message explaining the encountered error.
 
-### Get All Questions of Category
+### Get All Categories
 
-- **Endpoint:** `/category/:name`
+- **Endpoint:** `/category`
 - **Method:** `GET`
 - **Headers:**
   - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
-  - `200 OK` status code, Successfully retrieved questions in the specified category.
-  - `questions` (array): List of all questions in the specified category.
+  - `200 OK` status code, Successfully retrieved all categories.
+  - `401 Unauthorized` status code if user authentication fails.
+- **Response Body (Success):**
+  - `categories`: An array of categories belonging to the user.
+- **Response Body (Error):**
+  - `error`: A descriptive message explaining the encountered error.
 
 ### Rename Category
 
-- **Endpoint:** `/category/:name`
+- **Endpoint:** `/category/:category`
 - **Method:** `PUT`
 - **Headers:**
   - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
-  - `name` (string): New name for the category.
+  - `category`: The new name for the category.
 - **Response:**
-  - `200 OK` status code, Category name successfully updated.
-  - `message` (string): Success message confirming the category rename.
+  - `200 OK` status code if the category is renamed successfully.
+  - `400 Bad Request` status code if the request body is invalid or incomplete.
+  - `404 Not Found` status code if the category to be renamed is not found.
+  - `409 Conflict` status code if the new category name already exists.
+  - `401 Unauthorized` status code if user authentication fails.
+- **Response Body (Success):**
+  - `message`: A success message indicating the category was renamed successfully.
+  - `categories`: An array of the user's categories after the rename operation.
+- **Response Body (Error):**
+  - `error`: A descriptive message explaining the encountered error.
 
-### Remove Category
+### Delete Category
 
-- **Endpoint:** `/category/:name`
+- **Endpoint:** `/category/:category`
 - **Method:** `DELETE`
 - **Headers:**
   - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
-  - `204 No Content` status code, Category successfully removed.
-  - `message` (string): Success message confirming the category removal.
+  - `204 No Content` status code if the category is deleted successfully.
+  - `400 Bad Request` status code if attempting to delete the 'general' category.
+  - `404 Not Found` status code if the category to be deleted is not found.
+  - `401 Unauthorized` status code if user authentication fails.
+- **Response Body (Error):**
+  - `error`: A descriptive message explaining the encountered error.

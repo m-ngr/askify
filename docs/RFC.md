@@ -25,10 +25,10 @@
 - [ ] Can update his own profile data
 - [ ] Can follow/unfollow other users
 - [ ] Can block/unblock other users
-- [ ] Can create his own inbox
 - [ ] Can read his own inbox
-- [ ] Can update his own inbox
-- [ ] Can delete his own inbox
+- [x] Can create his own inbox categories
+- [x] Can rename his own inbox categories
+- [x] Can delete his own inbox categories
 - [ ] Can like/unlike a question
 - [ ] Can get Q&A from users they follow on the feed page
 - [ ] Can search for users
@@ -164,9 +164,9 @@
 
 - Mount point: /category/
 
-| Method | Endpoint | Function                         |
-| ------ | -------- | -------------------------------- |
-| POST   | /        | create new category              |
-| GET    | /:name   | get all question in the category |
-| PUT    | /:name   | rename the category              |
-| DELETE | /:name   | delete the category              |
+| Method | Endpoint   | Function            |
+| ------ | ---------- | ------------------- |
+| POST   | /          | create new category |
+| GET    | /          | get all categories  |
+| PUT    | /:category | rename the category |
+| DELETE | /:category | delete the category |
