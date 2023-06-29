@@ -7,21 +7,22 @@
 - **Endpoint:** `/signup`
 - **Method:** `POST`
 - **Request Body:**
-
-  User object with the required fields:
-
-  - `firstName` (string): First name of the user.
-  - `lastName` (string): Last name of the user.
-  - `username` (string): Unique username for the user.
-  - `email` (string): Email address of the user.
-  - `password` (string): User's password.
-
+  - `firstName`: The first name of the user.
+  - `lastName`: The last name of the user.
+  - `username`: The desired username for the user.
+  - `email`: The email address of the user.
+  - `password`: The password for the user's account.
 - **Response:**
-
-  `201 Created` status code with the following response body:
-
-  - `user` (object): The created user object.
-  - `token` (string): JWT token for authentication.
+  - `201 Created` status code if the user is created successfully.
+  - `400 Bad Request` status code if the request body is invalid or incomplete.
+  - `409 Conflict` status code if the username or email already exists.
+- **Response Body (Success):**
+  - `message`: A success message indicating the user was created successfully.
+- **Response Body (Error):**
+  - `errors` (array): An array containing the validation errors.
+    - Each error object has the following properties:
+      - `field`: The field related to the error.
+      - `message`: A message describing the error.
 
 ### Login
 
@@ -29,26 +30,30 @@
 - **Method:** `POST`
 - **Request Body:**
 
-  User object with the required fields (`email`, `password`) or (`username` , `password`).
+  - `login`: The username or email of the user.
+  - `password`: The password associated with the user's account.
 
 - **Response:**
-
-  `200 OK` status code with the following response body:
-
-  - `user` (object): The authenticated user object.
-  - `token` (string): JWT token for authentication.
+  - `200 OK` status code if the login is successful.
+  - `400 Bad Request` status code if the request body is invalid or incomplete.
+  - `401 Unauthorized` status code if the login credentials are incorrect.
+  - `404 Not Found` status code if the user is not found.
+- **Response Body (Success):**
+  - `message` (string): A success message indicating a successful login.
+- **Response Body (Error):**
+  - `error` (object): An object containing the error details.
+    - `field` (string): The field related to the error (`login` or `password`).
+    - `message` (string): A message describing the error.
 
 ### Logout
 
 - **Endpoint:** `/logout`
 - **Method:** `POST`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
-
-  `204 No Content` status code with the following response body:
-
-  - `message` (string): Logout success message.
+  - `204 No Content` status code if the logout is successful.
+  - `401 Unauthorized` status code if the token is invalid.
 
 ## Users Endpoints
 
@@ -57,7 +62,7 @@
 - **Endpoint:** `/users`
 - **Method:** `GET`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Query Parameters:**
   - `query` (string): Search query for users.
 - **Response:**
@@ -76,7 +81,7 @@
 - **Endpoint:** `/users/:id`
 - **Method:** `GET`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `200 OK` status code with the user info object in the response body.
 
@@ -85,7 +90,7 @@
 - **Endpoint:** `/users/:id`
 - **Method:** `PATCH`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
 
   **TEMP:** User object with the fields to be updated:
@@ -108,7 +113,7 @@
 - **Endpoint:** `/users/:id`
 - **Method:** `DELETE`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `204 No Content` status code indicating a successful deletion of the user.
 
@@ -119,7 +124,7 @@
 - **Query Parameters:**
   - `cat` (string, optional): Category name to filter questions. If not provided, retrieve questions from all categories.
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `200 OK` status code, Successfully retrieved the unanswered questions.
   - `questions` (array): List of unanswered questions in the specified category or in all categories if `cat` is not provided.
@@ -129,7 +134,7 @@
 - **Endpoint:** `/users/:id/inbox`
 - **Method:** `POST`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
   - `cat` (string): Category name for the question.
   - `question` (string): The question text.
@@ -142,7 +147,7 @@
 - **Endpoint:** `/users/:id/answers`
 - **Method:** `GET`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Description:** Retrieve the answered questions for a user.
 - **Response:**
   - `200 OK` status code: Successfully retrieved the answered questions.
@@ -157,7 +162,7 @@
 - **Endpoint:** `/users/:id/following`
 - **Method:** `GET`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Description:** Retrieve the users that the specified user is following.
 - **Response:**
   - `200 OK` status code: Successfully retrieved the list of users.
@@ -172,7 +177,7 @@
 - **Endpoint:** `/users/:id/followers`
 - **Method:** `GET`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Description:** Retrieve the users that follow the specified user.
 - **Response:**
   - `200 OK` status code: Successfully retrieved the list of users.
@@ -187,7 +192,7 @@
 - **Endpoint:** `/users/:id/followers`
 - **Method:** `POST`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `201 Created` status code indicating a successful follow action.
   - `message` (string): Follow success message.
@@ -197,7 +202,7 @@
 - **Endpoint:** `/users/:id/followers`
 - **Method:** `DELETE`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `204 No Content` status code indicating a successful unfollow action.
   - `message` (string): Unfollow success message.
@@ -209,7 +214,7 @@
 - **Endpoint:** `/questions`
 - **Method:** `GET`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Query Parameters:**
   - `query` (string): Search query for Q&A.
   - `user` (string, optional): User ID for filtering Q&A by specific user.
@@ -225,7 +230,7 @@
 - **Endpoint:** `/questions`
 - **Method:** `POST`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token.
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
 
   Question object with the required fields:

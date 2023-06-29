@@ -4,8 +4,8 @@
 
 ### Guest
 
-- [ ] Can signup a new user
-- [ ] Can login
+- [x] Can signup a new user
+- [x] Can login
 
 ### Common (Guest & User)
 
@@ -14,7 +14,7 @@
 
 ### User
 
-- [ ] Can logout
+- [x] Can logout
 - [ ] Can ask questions (select proper inbox)
 - [ ] Can delete his own questions
 - [ ] Can answer his own questions
