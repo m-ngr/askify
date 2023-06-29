@@ -251,7 +251,7 @@
 - **Endpoint:** `/questions/:id`
 - **Method:** `GET`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token ???
+  - `Cookie` header with the `token` value set as the JWT token. ???
 - **Response:**
   - `200 OK` status code with the question object in the response body.
 
@@ -260,7 +260,7 @@
 - **Endpoint:** `/questions/:id`
 - **Method:** `PATCH`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
   - Question object with the fields to be updated (`answer`, `category`).
 - **Response:**
@@ -271,7 +271,7 @@
 - **Endpoint:** `/questions/:id`
 - **Method:** `DELETE`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `204 No Content` status code indicating a successful deletion of the question.
 
@@ -280,7 +280,7 @@
 - **Endpoint:** `/questions/:id/comments`
 - **Method:** `POST`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
   - Comment object with the required field (`content`).
 - **Response:**
@@ -291,7 +291,7 @@
 - **Endpoint:** `/questions/:id/likes`
 - **Method:** `POST`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `201 Created` status code indicating a successful creation of the like.
   - `message` (string): Like success message.
@@ -301,7 +301,7 @@
 - **Endpoint:** `/questions/:id/likes`
 - **Method:** `DELETE`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `204 No Content` status code indicating a successful deletion of the like.
   - `message` (string): Unlike success message.
@@ -313,7 +313,7 @@
 - **Endpoint:** `/comments/:id`
 - **Method:** `PATCH`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
   - Comment object with the fields to be updated (`content`).
 - **Response:**
@@ -324,7 +324,7 @@
 - **Endpoint:** `/comments/:id`
 - **Method:** `DELETE`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `204 No Content` status code indicating a successful deletion of the comment.
 
@@ -335,7 +335,7 @@
 - **Endpoint:** `/category`
 - **Method:** `POST`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
   - `name` (string): Name of the new category to add.
 - **Response:**
@@ -347,7 +347,7 @@
 - **Endpoint:** `/category/:name`
 - **Method:** `GET`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `200 OK` status code, Successfully retrieved questions in the specified category.
   - `questions` (array): List of all questions in the specified category.
@@ -357,7 +357,7 @@
 - **Endpoint:** `/category/:name`
 - **Method:** `PUT`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Request Body:**
   - `name` (string): New name for the category.
 - **Response:**
@@ -369,7 +369,7 @@
 - **Endpoint:** `/category/:name`
 - **Method:** `DELETE`
 - **Headers:**
-  - `Authorization` or `Cookie` header with the JWT token
+  - `Cookie` header with the `token` value set as the JWT token.
 - **Response:**
   - `204 No Content` status code, Category successfully removed.
   - `message` (string): Success message confirming the category removal.
