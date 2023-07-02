@@ -1,9 +1,9 @@
 import { Schema, model } from "mongoose";
-import { UserDoc, updateResult } from "../types";
+import { User, updateResult } from "../types";
 import uniqueValidator from "mongoose-unique-validator";
 import bcrypt from "bcrypt";
 
-const userSchema = new Schema<UserDoc>({
+const userSchema = new Schema<User>({
   firstName: {
     type: String,
     trim: true,
@@ -41,7 +41,7 @@ const userSchema = new Schema<UserDoc>({
     type: String,
     required: [true, "Password is required"],
     minlength: [8, "Password must have a minimum of 8 characters"],
-    maxlength: [50, "Password must have a maximum of 50 characters"],
+    maxlength: [512, "Password must have a maximum of 512 characters"],
     match: [
       /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).+$/,
       "Password must contain one uppercase letter, one lowercase letter, one number, and one special character",
@@ -85,7 +85,7 @@ userSchema.methods.setField = async function (
   field: string,
   value: string
 ): Promise<updateResult> {
-  const user = this as UserDoc;
+  const user = this as User;
   if (!(field in user)) throw Error("No such field");
 
   const original = user[field];
@@ -107,9 +107,9 @@ userSchema.methods.setField = async function (
   }
 };
 
-userSchema.methods.batch = async function () {
-  const user = this as UserDoc;
-  // update each field separatly
+userSchema.methods.publicInfo = function () {
+  const { password, __v, _id, ...info } = this._doc;
+  return { id: _id, ...info };
 };
 
 userSchema.methods.comparePassword = async function (password: string) {

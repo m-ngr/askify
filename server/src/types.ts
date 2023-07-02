@@ -16,6 +16,10 @@ export interface User extends Document {
   categories: string[];
   followers: number;
   following: number;
+
+  setField(field: string, value: string): Promise<updateResult>;
+  comparePassword(password: string): Promise<boolean>;
+  publicInfo(): Record<string, any>;
 }
 
 declare global {
@@ -26,7 +30,12 @@ declare global {
   }
 }
 
-export interface validatorError {
+export interface validationError {
   field: string;
+  message: string;
+}
+
+export interface updateResult {
+  success: boolean;
   message: string;
 }
