@@ -105,6 +105,8 @@
 
 > :warning: This is a preliminary incomplete design, and it's likely to change and evolve during the development phase.
 
+> 💡 Possible API change: move signup to `/account` endpoint.
+
 ### Auth
 
 - Mount point: / (root)
@@ -115,6 +117,17 @@
 | POST   | /login   | Log the user in  |
 | POST   | /logout  | Log the user out |
 
+### Account
+
+- Mount point: /account/
+
+| Method | Endpoint  | Function                     |
+| ------ | --------- | ---------------------------- |
+| GET    | /         | get current user info        |
+| PATCH  | /         | update current user info     |
+| DELETE | /         | delete current user          |
+| PUT    | /password | update current user password |
+
 ### Users
 
 - Mount point: /users/
@@ -123,9 +136,6 @@
 | ------ | ------------------- | ----------------------------------------- |
 | GET    | /                   | Search users                              |
 | GET    | /profiles/:username | get profile info                          |
-| GET    | /:id                | get user info                             |
-| PATCH  | /:id                | update user info                          |
-| DELETE | /:id                | delete user                               |
 | GET    | /:id/inbox          | get unanswered questions in inbox         |
 | POST   | /:id/inbox          | ask this user a question in inbox         |
 | GET    | /:id/answers        | get answered questions                    |

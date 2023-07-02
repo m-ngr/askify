@@ -55,6 +55,81 @@
   - `204 No Content` status code if the logout is successful.
   - `401 Unauthorized` status code if the token is invalid.
 
+## Account Endpoints
+
+### Get User Info
+
+- **Endpoint:** `/account`
+- **Method:** `GET`
+- **Headers:**
+  - `Cookie` header with the `token` value set as the JWT token.
+- **Response:**
+  - `200 OK` status code if the account information is retrieved successfully.
+  - `401 Unauthorized` status code if the token is invalid.
+- **Response Body (Success):**
+  - An object containing the information of the user.
+- **Response Body (Error):**
+  - `error`: A descriptive message explaining the encountered error.
+
+### Delete User
+
+- **Endpoint:** `/account`
+- **Method:** `DELETE`
+- **Headers:**
+  - `Cookie` header with the `token` value set as the JWT token.
+- **Response:**
+  - `204 No Content` status code if the account is deleted successfully.
+  - `401 Unauthorized` status code if the token is invalid.
+- **Response Body (Error):**
+  - `error`: A descriptive message explaining the encountered error.
+
+### Update User Info
+
+- **Endpoint:** `/account`
+- **Method:** `PATCH`
+- **Headers:**
+  - `Cookie` header with the `token` value set as the JWT token.
+- **Request Body:**
+  - `firstName` (optional): The updated first name of the user.
+  - `lastName` (optional): The updated last name of the user.
+  - `username` (optional): The updated username for the user.
+  - `email` (optional): The updated email address of the user.
+  - `bio` (optional): The updated biography of the user.
+  - `avatar` (optional): The updated avatar image URL of the user.
+  - `allowAnonymous` (optional): A boolean indicating whether the user allows anonymous questions.
+- **Response:**
+  - `200 OK` status code if the account information is updated successfully.
+  - `400 Bad Request` status code if the request body is invalid or contains errors.
+  - `401 Unauthorized` status code if the token is invalid.
+- **Response Body (Success):**
+  - `errors` (array): An array containing any encountered errors during the update process.
+    - Each error object has the following properties:
+      - `field`: The field related to the error.
+      - `message`: A message describing the error.
+  - `modified` (object): An object indicating which fields were modified during the update.
+    - Each key represents a field name, and the corresponding value is a boolean indicating whether the field was modified.
+  - `user` (object): The updated user information.
+- **Response Body (Error):**
+  - `error`: A descriptive message explaining the encountered error.
+
+### Update User Password
+
+- **Endpoint:** `/account/password`
+- **Method:** `PUT`
+- **Headers:**
+  - `Cookie` header with the `token` value set as the JWT token.
+- **Request Body:**
+  - `oldPassword` : The current password of the user's account.
+  - `password` : The new password to set for the user's account.
+- **Response:**
+  - `200 OK` status code if the password is updated successfully.
+  - `400 Bad Request` status code if the request body is invalid or contains errors.
+  - `401 Unauthorized` status code if the provided old password does not match the current password.
+- **Response Body (Success):**
+  - `message` : A success message indicating that the password was updated successfully.
+- **Response Body (Error):**
+  - `error`: A descriptive message explaining the encountered error.
+
 ## Users Endpoints
 
 ### Search Users
@@ -75,47 +150,6 @@
 - **Method:** `GET`
 - **Response:**
   - `200 OK` status code with the user profile object in the response body.
-
-### Get User Info
-
-- **Endpoint:** `/users/:id`
-- **Method:** `GET`
-- **Headers:**
-  - `Cookie` header with the `token` value set as the JWT token.
-- **Response:**
-  - `200 OK` status code with the user info object in the response body.
-
-### Update User Info
-
-- **Endpoint:** `/users/:id`
-- **Method:** `PATCH`
-- **Headers:**
-  - `Cookie` header with the `token` value set as the JWT token.
-- **Request Body:**
-
-  **TEMP:** User object with the fields to be updated:
-
-  - `firstName` (string): Updated first name of the user.
-  - `lastName` (string): Updated last name of the user.
-  - `username` (string): Updated username for the user.
-  - `email` (string): Updated email for the user.
-  - `password` (string): Updated password for the user.
-  - `oldPassword` (string): Old password for the user.
-  - `bio` (string): Updated bio information.
-  - `avatar` (string): Updated avatar URL.
-  - `allowAnonymous` (boolean): updated allow anonymous questions.
-
-- **Response:**
-  - `200 OK` status code with the updated user info object in the response body.
-
-### Delete User
-
-- **Endpoint:** `/users/:id`
-- **Method:** `DELETE`
-- **Headers:**
-  - `Cookie` header with the `token` value set as the JWT token.
-- **Response:**
-  - `204 No Content` status code indicating a successful deletion of the user.
 
 ### Get Unanswered Questions in Inbox
 
