@@ -5,6 +5,7 @@ import User from "../models/User";
 import { isValidObjectId } from "mongoose";
 import { Question as IQuestion } from "../types";
 import Like from "../models/Like";
+import Comment from "../models/Comment";
 
 export async function searchQuestions(
   req: Request,
@@ -193,12 +194,54 @@ export async function deleteQuestion(
   }
 }
 
-export function getComments(req: Request, res: Response, next: NextFunction) {
-  res.send("NOT IMPLEMENTED");
+export async function getComments(req: Request, res: Response) {
+  const id = req.params.id;
+  const comments = await Comment.find({ question: id });
+  res.json(comments);
 }
 
-export function addComment(req: Request, res: Response, next: NextFunction) {
-  res.send("NOT IMPLEMENTED");
+export async function addComment(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const id = req.params.id;
+    const content = req.body.content;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid question ID" });
+    }
+
+    const question = await Question.findById(id);
+
+    if (!question) {
+      return res.status(404).json({ error: "Question not found" });
+    }
+
+    if (!question.isAnswered) {
+      return res.status(401).json({
+        error: "You don't have permission to access this question",
+      });
+    }
+
+    const comment = await Comment.create({
+      user: req.user!.id,
+      question: question.id,
+      content,
+    });
+
+    question.comments += 1;
+    await question.save();
+
+    res.status(201).json(comment);
+  } catch (e: any) {
+    const errors = mongooseErrors(e);
+    if (errors.length) {
+      return res.status(400).json({ errors });
+    }
+    next(e);
+  }
 }
 
 export async function like(req: Request, res: Response, next: NextFunction) {
