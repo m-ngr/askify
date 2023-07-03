@@ -5,13 +5,12 @@ import { authMiddleware } from "../middlewares/auth";
 const router = Router();
 
 router.get("/", controller.searchUsers);
-router.get("/profiles/:username", controller.getProfile);
-router.get("/:id/inbox", controller.getAnswers);
+router.get("/:username", controller.getProfile);
+router.get("/:id/questions", controller.getAnswers);
 
 router.use(authMiddleware);
 
-router.get("/:id/inbox", controller.getInbox);
-router.post("/:id/inbox", controller.askUser);
+router.post("/:id/questions", controller.askUser);
 
 router.get("/:id/following", controller.getFollowing);
 router.get("/:id/followers", controller.getFollowers);

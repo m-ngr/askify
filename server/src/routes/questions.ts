@@ -4,6 +4,8 @@ import * as controller from "../controllers/questions";
 
 const router = Router();
 
+router.get("/inbox", authMiddleware, controller.getInbox);
+
 router.get("/", controller.searchQuestions);
 router.get("/:id", controller.readAnswer);
 router.get("/:id/comments", controller.getComments);

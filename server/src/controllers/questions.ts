@@ -15,6 +15,16 @@ export async function searchQuestions(
   res.send("NOT IMPLEMENTED");
 }
 
+export async function getInbox(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const toUser = req.user?.id;
+  const questions = await Question.find({ toUser, answer: "" });
+  res.json(questions);
+}
+
 export async function createQuestion(
   req: Request,
   res: Response,
