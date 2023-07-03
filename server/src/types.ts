@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, ObjectId } from "mongoose";
 
 export interface JwtAuth {
   userId: string;
@@ -19,6 +19,23 @@ export interface User extends Document {
 
   setField(field: string, value: string): Promise<updateResult>;
   comparePassword(password: string): Promise<boolean>;
+  publicInfo(): Record<string, any>;
+}
+
+export interface Question extends Document {
+  fromUser: ObjectId;
+  toUser: ObjectId;
+  question: string;
+  answer: string;
+  isAnonymous: boolean;
+  category: string;
+  createdAt: Date;
+  answeredAt: Date;
+  likes: number;
+  comments: number;
+  //virtual:
+  isAnswered: boolean;
+
   publicInfo(): Record<string, any>;
 }
 
