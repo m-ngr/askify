@@ -14,10 +14,12 @@ const questionSchema = new Schema<Question>({
   },
   question: {
     type: String,
+    trim: true,
     required: [true, "Question is required"],
   },
   answer: {
     type: String,
+    trim: true,
     default: "",
   },
   isAnonymous: {
@@ -26,6 +28,7 @@ const questionSchema = new Schema<Question>({
   },
   category: {
     type: String,
+    trim: true,
     default: "general",
   },
   createdAt: {
