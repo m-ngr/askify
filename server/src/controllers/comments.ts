@@ -24,7 +24,7 @@ export async function editComment(
     }
 
     if (req.user!.id != comment.user) {
-      return res.status(401).json({
+      return res.status(403).json({
         error: "You don't have permission to edit this comment",
       });
     }
@@ -64,7 +64,7 @@ export async function deleteComment(
     const question = await Question.findById(comment.question);
 
     if (user.id != comment.user && user.id != question?.toUser) {
-      return res.status(401).json({
+      return res.status(403).json({
         error: "You don't have permission to delete this comment",
       });
     }
