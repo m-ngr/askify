@@ -29,6 +29,7 @@ const questionSchema = new Schema<Question>({
   category: {
     type: String,
     trim: true,
+    required: [true, "category is required"],
     default: "general",
   },
   createdAt: {
