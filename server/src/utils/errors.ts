@@ -12,7 +12,19 @@ export function mongooseErrors(error: any) {
         message: `${error.keyValue[field]} already exists`,
       });
     }
+  } else if (error.name === "CastError") {
+    const { path: field, kind } = error;
+    result.push({ field, message: `${field} must be ${kind}` });
   }
 
   return result;
+}
+
+export function isValidRegex(input: string) {
+  try {
+    new RegExp(input);
+    return true;
+  } catch {
+    return false;
+  }
 }

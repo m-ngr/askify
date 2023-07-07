@@ -55,13 +55,19 @@ questionSchema.virtual("isAnswered").get(function () {
   return this.answer !== "";
 });
 
-questionSchema.methods.publicInfo = function () {
-  const { fromUser, __v, _id, ...info } = this._doc;
-  if (this.isAnonymous) {
-    return { id: _id, ...info };
-  } else {
-    return { id: _id, ...info, fromUser };
-  }
-};
+questionSchema.index({ question: "text", answer: "text" });
+
+questionSchema.set("toJSON", {
+  virtuals: false,
+  versionKey: false,
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+
+    if (ret.isAnonymous) ret.fromUser = null;
+
+    delete ret._id;
+    delete ret.isAnonymous;
+  },
+});
 
 export default model("Question", questionSchema);
