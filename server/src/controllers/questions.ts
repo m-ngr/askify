@@ -37,7 +37,7 @@ export async function searchQuestions(
     }
 
     const questions = await Question.find(filter)
-      .sort({ createdAt: sort === "oldest" ? 1 : -1 })
+      .sort({ answeredAt: sort === "oldest" ? 1 : -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
