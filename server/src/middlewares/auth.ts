@@ -22,7 +22,7 @@ export const authMiddleware: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ error: "Bad token." });
   }
 
-  const user = await User.findById(payload.userId);
+  const user = await User.findById(payload.userId).select("+email +password");
   if (!user) {
     res.clearCookie("token");
     return res.status(401).json({ error: "User not found." });

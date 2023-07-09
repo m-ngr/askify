@@ -36,6 +36,7 @@ const userSchema = new Schema<User>({
     lowercase: true,
     required: [true, "Email is required"],
     match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email address"],
+    select: false,
   },
   password: {
     type: String,
@@ -46,6 +47,7 @@ const userSchema = new Schema<User>({
       /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).+$/,
       "Password must contain one uppercase letter, one lowercase letter, one number, and one special character",
     ],
+    select: false,
   },
   avatar: { type: String, trim: true },
   bio: { type: String, trim: true },
@@ -105,21 +107,33 @@ userSchema.methods.setField = async function (
   }
 };
 
-userSchema.methods.publicInfo = function () {
-  const { password, __v, _id, ...info } = this._doc;
-  return { id: _id, ...info };
-};
-
 userSchema.methods.comparePassword = async function (password: string) {
   return await bcrypt.compare(password.toString(), this.password);
 };
 
 userSchema.methods.hasCategory = function (catId: string): boolean {
   const user = this as User;
-  const id = user.categories.findIndex(
-    (cat: any) => cat.toString() === catId.toLowerCase()
-  );
-  return id !== -1;
+  let idx = -1;
+  if (user.populated("categories")) {
+    idx = user.categories.findIndex(
+      (cat: any) => cat.id.toString() === catId.toLowerCase()
+    );
+  } else {
+    idx = user.categories.findIndex(
+      (cat: any) => cat.toString() === catId.toLowerCase()
+    );
+  }
+  return idx !== -1;
 };
+
+userSchema.set("toJSON", {
+  virtuals: false,
+  versionKey: false,
+  transform: function (doc, ret) {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.password;
+  },
+});
 
 export default model("User", userSchema);

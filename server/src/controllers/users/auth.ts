@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import User from "../models/User";
-import { jwtSign } from "../utils/jwt";
-import { mongooseErrors } from "../utils/errors";
+import User from "../../models/User";
+import { jwtSign } from "../../utils/jwt";
+import { mongooseErrors } from "../../utils/errors";
 
 export async function signup(req: Request, res: Response, next: NextFunction) {
   try {
@@ -22,7 +22,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     const { login, password } = req.body;
     const user = await User.findOne({
       $or: [{ username: login }, { email: login }],
-    });
+    }).select("+email +password");
 
     if (!user) {
       return res
@@ -42,7 +42,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
     });
 
-    return res.status(200).json({ message: "Login success" });
+    return res.status(200).json({ user });
   } catch (error) {
     next(error);
   }

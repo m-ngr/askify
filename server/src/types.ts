@@ -19,7 +19,6 @@ export interface User extends Document {
 
   setField(field: string, value: string): Promise<updateResult>;
   comparePassword(password: string): Promise<boolean>;
-  publicInfo(): Record<string, any>;
   hasCategory(catId: string): boolean;
 }
 

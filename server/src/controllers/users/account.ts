@@ -1,8 +1,11 @@
 import { NextFunction, Request, Response } from "express";
+import { isValidRegex } from "../../utils/errors";
+import { isValidObjectId } from "mongoose";
+import Question from "../../models/Question";
 
 export function getInfo(req: Request, res: Response, next: NextFunction) {
   try {
-    return res.json(req.user?.publicInfo());
+    return res.json(req.user);
   } catch (error) {
     next(error);
   }
@@ -57,7 +60,7 @@ export async function updateInfo(
 
     await user.save();
 
-    res.json({ errors, modified, user: user.publicInfo() });
+    res.json({ errors, modified, user });
   } catch (error) {
     next(error);
   }
@@ -71,19 +74,71 @@ export async function updatePassword(
   try {
     const oldPassword = String(req.body.oldPassword);
     const password = String(req.body.password);
+    const user = req.user!;
 
-    if (!(await req.user?.comparePassword(oldPassword))) {
+    if (!(await user.comparePassword(oldPassword))) {
       return res.status(401).json({ error: "Incorrect old password" });
     }
 
-    const { success, message } = await req.user!.setField("password", password);
+    const { success, message } = await user.setField("password", password);
 
     if (!success) {
       return res.status(400).json({ error: message });
     }
 
-    await req.user?.save();
+    await user.save();
     res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getInbox(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const user = req.user!;
+    const query = req.query.q as string;
+    const sort = String(req.query.sort).toLowerCase();
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.max(
+      1,
+      Math.min(parseInt(req.query.limit as string) || 10, 100)
+    );
+
+    const filter: any = { toUser: user.id, answer: "" };
+
+    if (query) {
+      if ("regex" in req.query) {
+        if (!isValidRegex(query)) {
+          return res.status(400).json({ error: "Invalid regex query" });
+        }
+        filter.$or = [{ question: { $regex: query, $options: "i" } }];
+      } else {
+        filter.$text = { $search: query };
+      }
+    }
+
+    if ("cat" in req.query) {
+      const cat = (req.query.cat as string).trim().toLowerCase();
+
+      if (cat === "" || cat === "general") {
+        filter.category = undefined;
+      } else if (isValidObjectId(cat)) {
+        filter.category = cat;
+      } else {
+        return res.status(400).json({ error: "Invalid category id" });
+      }
+    }
+
+    const questions = await Question.find(filter)
+      .sort({ createdAt: sort === "oldest" ? 1 : -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.json({ page, questions });
   } catch (error) {
     next(error);
   }

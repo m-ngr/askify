@@ -56,9 +56,6 @@ export async function getProfile(
   res: Response,
   next: NextFunction
 ) {
-  /**
-   * change the fields of the returned object (no email)
-   */
   try {
     const handle = req.params.handle;
 
@@ -70,7 +67,7 @@ export async function getProfile(
       return res.status(404).json({ error: "user not found" });
     }
 
-    res.json(user.publicInfo());
+    res.json(user);
   } catch (error) {
     next(error);
   }
@@ -86,7 +83,6 @@ export async function getAnswers(
    */
   try {
     const query = req.query.q as string;
-    const category = req.query.cat as string;
     const sort = String(req.query.sort).toLowerCase();
     const page = Math.max(1, parseInt(req.query.page as string) || 1);
     const limit = Math.max(
@@ -94,22 +90,7 @@ export async function getAnswers(
       Math.min(parseInt(req.query.limit as string) || 10, 100)
     );
 
-    if (category && !isValidObjectId(category)) {
-      return res.status(400).json({ error: "Invalid category id" });
-    }
-
-    const handle = req.params.handle;
-    const toUser = isValidObjectId(handle)
-      ? handle
-      : (await User.findOne({ username: handle }, { id: 1 }))?.id;
-
-    if (!toUser) {
-      return res.status(400).json({ error: "Invalid user handle" });
-    }
-
-    const filter: any = { toUser, answer: { $ne: "" } };
-
-    if (category) filter.category = category;
+    const filter: any = { answer: { $ne: "" } };
 
     if (query) {
       if ("regex" in req.query) {
@@ -124,6 +105,29 @@ export async function getAnswers(
         filter.$text = { $search: query };
       }
     }
+
+    if ("cat" in req.query) {
+      const cat = (req.query.cat as string).trim().toLowerCase();
+
+      if (cat === "" || cat === "general") {
+        filter.category = undefined;
+      } else if (isValidObjectId(cat)) {
+        filter.category = cat;
+      } else {
+        return res.status(400).json({ error: "Invalid category id" });
+      }
+    }
+
+    const handle = req.params.handle;
+    const toUser = isValidObjectId(handle)
+      ? handle
+      : (await User.findOne({ username: handle }, { id: 1 }))?.id;
+
+    if (!toUser) {
+      return res.status(400).json({ error: "Invalid user handle" });
+    }
+
+    filter.toUser = toUser;
 
     const questions = await Question.find(filter)
       .sort({ answeredAt: sort === "oldest" ? 1 : -1 })
