@@ -27,10 +27,8 @@ const questionSchema = new Schema<Question>({
     default: false,
   },
   category: {
-    type: String,
-    trim: true,
-    required: [true, "category is required"],
-    default: "general",
+    type: Schema.Types.ObjectId,
+    ref: "Category",
   },
   createdAt: {
     type: Date,

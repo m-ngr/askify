@@ -10,7 +10,7 @@ export async function editComment(
   next: NextFunction
 ) {
   try {
-    const id = req.params.id;
+    const id = req.params.id.trim();
     const content = req.body.content;
 
     if (!isValidObjectId(id)) {
@@ -48,7 +48,7 @@ export async function deleteComment(
   next: NextFunction
 ) {
   try {
-    const id = req.params.id;
+    const id = req.params.id.trim();
     const user = req.user!;
 
     if (!isValidObjectId(id)) {

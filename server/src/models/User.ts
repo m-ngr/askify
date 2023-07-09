@@ -52,20 +52,18 @@ const userSchema = new Schema<User>({
   allowAnonymous: { type: Boolean, default: true },
   followers: { type: Number, default: 0, min: 0 },
   following: { type: Number, default: 0, min: 0 },
-  categories: {
-    type: [String],
-    default: ["general"],
-    validate: {
-      validator: function (value: string[]) {
-        const hasGeneral = value.includes("general");
-        const uniqueValues = new Set(value);
-        return hasGeneral && uniqueValues.size === value.length;
-      },
-      message:
-        'The categories field must have "general" as one of the values and unique values.',
+  categories: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
     },
-  },
+  ],
 });
+
+userSchema.index(
+  { firstName: "text", lastName: "text", username: "text", bio: "text" },
+  { weights: { firstName: 5, lastName: 4, username: 2, bio: 1 } }
+);
 
 userSchema.plugin(uniqueValidator, { message: "{VALUE} already exists" });
 
@@ -114,6 +112,14 @@ userSchema.methods.publicInfo = function () {
 
 userSchema.methods.comparePassword = async function (password: string) {
   return await bcrypt.compare(password.toString(), this.password);
+};
+
+userSchema.methods.hasCategory = function (catId: string): boolean {
+  const user = this as User;
+  const id = user.categories.findIndex(
+    (cat: any) => cat.toString() === catId.toLowerCase()
+  );
+  return id !== -1;
 };
 
 export default model("User", userSchema);

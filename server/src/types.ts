@@ -13,13 +13,14 @@ export interface User extends Document {
   avatar: string;
   bio: string;
   allowAnonymous: boolean;
-  categories: string[];
+  categories: ObjectId[];
   followers: number;
   following: number;
 
   setField(field: string, value: string): Promise<updateResult>;
   comparePassword(password: string): Promise<boolean>;
   publicInfo(): Record<string, any>;
+  hasCategory(catId: string): boolean;
 }
 
 export interface Question extends Document {
@@ -28,15 +29,13 @@ export interface Question extends Document {
   question: string;
   answer: string;
   isAnonymous: boolean;
-  category: string;
+  category: ObjectId;
   createdAt: Date;
   answeredAt: Date;
   likes: number;
   comments: number;
   //virtual:
   isAnswered: boolean;
-
-  publicInfo(): Record<string, any>;
 }
 
 declare global {

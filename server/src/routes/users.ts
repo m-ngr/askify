@@ -5,16 +5,17 @@ import { authMiddleware } from "../middlewares/auth";
 const router = Router();
 
 router.get("/", controller.searchUsers);
-router.get("/:username", controller.getProfile);
-router.get("/:id/questions", controller.getAnswers);
+router.get("/:handle", controller.getProfile);
+router.get("/:handle/questions", controller.getAnswers);
 
 router.use(authMiddleware);
 
-router.post("/:id/questions", controller.askUser);
+router.get("/me/categories", controller.getCategories);
+router.post("/me/categories", controller.createCategory);
+router.get("/me/categories/:id", controller.getCategory);
+router.put("/me/categories/:id", controller.renameCategory);
+router.delete("/me/categories/:id", controller.deleteCategory);
 
-router.get("/:id/following", controller.getFollowing);
-router.get("/:id/followers", controller.getFollowers);
-router.post("/:id/followers", controller.follow);
-router.delete("/:id/followers", controller.unfollow);
+router.post("/:handle/questions", controller.askUser);
 
 export default router;
