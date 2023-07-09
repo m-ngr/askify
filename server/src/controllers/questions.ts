@@ -52,7 +52,7 @@ export async function readAnswer(
   res: Response,
   next: NextFunction
 ) {
-  const id = req.params.id;
+  const id = req.params.id.trim();
 
   if (!isValidObjectId(id)) {
     return res.status(400).json({ error: "Invalid question ID" });
@@ -89,7 +89,7 @@ export async function deleteQuestion(
   next: NextFunction
 ) {
   try {
-    const id = req.params.id;
+    const id = req.params.id.trim();
 
     if (!isValidObjectId(id)) {
       return res.status(400).json({ error: "Invalid question ID" });
@@ -124,7 +124,7 @@ export async function changeCategory(
   next: NextFunction
 ) {
   try {
-    const { id } = req.params;
+    const id = req.params.id.trim();
     const { category } = req.body;
     const user = req.user!;
 
@@ -132,23 +132,26 @@ export async function changeCategory(
       return res.status(400).json({ error: "Invalid question ID" });
     }
 
-    if (!category) {
-      return res.status(400).json({ error: "category is required" });
-    }
+    const update: any = {};
 
-    if (typeof category !== "string") {
-      return res.status(400).json({ error: "Invalid category type" });
-    }
+    if (category) {
+      if (!isValidObjectId(category)) {
+        return res.status(400).json({ error: "Invalid category ID" });
+      }
 
-    if (!user.hasCategory(category)) {
-      return res.status(400).json({
-        error: `User does not have a ${category} category`,
-      });
+      if (!user.hasCategory(category)) {
+        return res.status(400).json({
+          error: "User does not have such category",
+        });
+      }
+      update.category = category;
+    } else {
+      update.$unset = { category: 1 };
     }
 
     const question = await Question.findOneAndUpdate(
       { _id: id, toUser: user.id },
-      { category },
+      update,
       { new: true, runValidators: true }
     );
 
@@ -177,7 +180,7 @@ export async function changeAnswer(
   next: NextFunction
 ) {
   try {
-    const { id } = req.params;
+    const id = req.params.id.trim();
     const { answer } = req.body;
 
     if (!isValidObjectId(id)) {
@@ -223,7 +226,7 @@ export async function deleteAnswer(
   next: NextFunction
 ) {
   try {
-    const { id } = req.params;
+    const id = req.params.id.trim();
 
     if (!isValidObjectId(id)) {
       return res.status(400).json({ error: "Invalid answer ID" });
@@ -255,7 +258,7 @@ export async function deleteAnswer(
 
 export async function like(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = req.params.id;
+    const id = req.params.id.trim();
 
     if (!isValidObjectId(id)) {
       return res.status(400).json({ error: "Invalid answer ID" });
@@ -283,7 +286,7 @@ export async function like(req: Request, res: Response, next: NextFunction) {
 
 export async function unlike(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = req.params.id;
+    const id = req.params.id.trim();
 
     if (!isValidObjectId(id)) {
       return res.status(400).json({ error: "Invalid answer ID" });
@@ -313,7 +316,7 @@ export async function addComment(
   next: NextFunction
 ) {
   try {
-    const id = req.params.id;
+    const id = req.params.id.trim();
     const content = req.body.content;
 
     if (!isValidObjectId(id)) {
@@ -350,7 +353,7 @@ export async function getComments(req: Request, res: Response) {
    * Should we paginate comments?
    * Should we sort comments on the server?
    */
-  const id = req.params.id;
+  const id = req.params.id.trim();
 
   if (!isValidObjectId(id)) {
     return res.status(400).json({ error: "Invalid answer ID" });
