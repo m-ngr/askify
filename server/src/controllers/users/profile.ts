@@ -94,6 +94,10 @@ export async function getAnswers(
       Math.min(parseInt(req.query.limit as string) || 10, 100)
     );
 
+    if (category && !isValidObjectId(category)) {
+      return res.status(400).json({ error: "Invalid category id" });
+    }
+
     const handle = req.params.handle;
     const toUser = isValidObjectId(handle)
       ? handle
@@ -137,7 +141,11 @@ export async function getAnswers(
 export async function askUser(req: Request, res: Response, next: NextFunction) {
   try {
     const { question, isAnonymous, category } = req.body;
-    const handle = req.params.handle;
+    const handle = req.params.handle.trim();
+
+    if (category && !isValidObjectId(category)) {
+      return res.status(400).json({ error: "Invalid category id" });
+    }
 
     const toUser = await (isValidObjectId(handle)
       ? User.findById(handle)
@@ -160,7 +168,7 @@ export async function askUser(req: Request, res: Response, next: NextFunction) {
       return res.status(400).json({
         error: {
           field: "category",
-          message: `User does not have ${category} category`,
+          message: "User does not have such category",
         },
       });
     }
