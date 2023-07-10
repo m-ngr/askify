@@ -45,11 +45,6 @@ declare global {
   }
 }
 
-export interface validationError {
-  field: string;
-  message: string;
-}
-
 export interface updateResult {
   success: boolean;
   message: string;

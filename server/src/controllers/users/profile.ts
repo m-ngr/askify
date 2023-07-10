@@ -188,7 +188,7 @@ export async function askUser(req: Request, res: Response, next: NextFunction) {
     return res.status(201).json({ message: "Question created successfully" });
   } catch (e) {
     const errors = mongooseErrors(e);
-    if (errors.length) {
+    if (Object.keys(errors).length) {
       return res.status(400).json({ errors });
     }
     next(e);

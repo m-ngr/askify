@@ -167,7 +167,7 @@ export async function changeCategory(
     res.json(question);
   } catch (e) {
     const errors = mongooseErrors(e);
-    if (errors.length) {
+    if (Object.keys(errors).length) {
       return res.status(400).json({ errors });
     }
     next(e);
@@ -213,7 +213,7 @@ export async function changeAnswer(
     res.json(question);
   } catch (e) {
     const errors = mongooseErrors(e);
-    if (errors.length) {
+    if (Object.keys(errors).length) {
       return res.status(400).json({ errors });
     }
     next(e);
@@ -341,7 +341,7 @@ export async function addComment(
     res.status(201).json(comment);
   } catch (e: any) {
     const errors = mongooseErrors(e);
-    if (errors.length) {
+    if (Object.keys(errors).length) {
       return res.status(400).json({ errors });
     }
     next(e);

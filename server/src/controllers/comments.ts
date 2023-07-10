@@ -35,7 +35,7 @@ export async function editComment(
     res.json(comment);
   } catch (e: any) {
     const errors = mongooseErrors(e);
-    if (errors.length) {
+    if (Object.keys(errors).length) {
       return res.status(400).json({ errors });
     }
     next(e);
