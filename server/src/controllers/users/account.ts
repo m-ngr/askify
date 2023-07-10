@@ -2,6 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { isValidRegex } from "../../utils/errors";
 import { isValidObjectId } from "mongoose";
 import Question from "../../models/Question";
+import Category from "../../models/Category";
+import Like from "../../models/Like";
+import Comment from "../../models/Comment";
 
 export function getInfo(req: Request, res: Response, next: NextFunction) {
   try {
@@ -17,7 +20,39 @@ export async function deleteAccount(
   next: NextFunction
 ) {
   try {
-    await req.user?.deleteOne();
+    const user = req.user!;
+
+    // delete user categories
+    Category.deleteMany({ _id: { $in: user.categories } }).exec();
+
+    // delete my questions
+    const likesOnQuestion: any[] = [];
+    const commentsOnQuestion: any[] = [];
+    const questionsToDelete = await Question.find(
+      { toUser: user.id },
+      { likes: 1, comments: 1 }
+    );
+
+    for (let i = 0; i < questionsToDelete.length; ++i) {
+      const doc = questionsToDelete[i];
+      if (doc.likes > 0) likesOnQuestion.push(doc.id);
+      if (doc.comments > 0) commentsOnQuestion.push(doc.id);
+    }
+
+    Question.deleteMany({ toUser: user.id }).exec();
+    Like.deleteMany({ question: { $in: likesOnQuestion } }).exec();
+    Comment.deleteMany({ question: { $in: commentsOnQuestion } }).exec();
+
+    // Mark user as deleted
+    Question.updateMany(
+      { fromUser: user.id },
+      { $unset: { fromUser: 1 } }
+    ).exec();
+    Like.updateMany({ user: user.id }, { $unset: { user: 1 } }).exec();
+    Comment.updateMany({ user: user.id }, { $unset: { user: 1 } }).exec();
+
+    user.deleteOne();
+
     return res.sendStatus(204);
   } catch (error) {
     next(error);
