@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import RootLayout from "./layouts/RootLayout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import { UserProvider } from "./contexts/UserContext";
 
 export default function App() {
   const router = createBrowserRouter(
@@ -22,5 +23,9 @@ export default function App() {
     )
   );
 
-  return <RouterProvider router={router} />;
+  return (
+    <UserProvider>
+      <RouterProvider router={router} />
+    </UserProvider>
+  );
 }

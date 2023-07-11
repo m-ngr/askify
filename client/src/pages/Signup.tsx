@@ -12,8 +12,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { fetcher } from "../utils/fetcher";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link as RouterLink } from "react-router-dom";
-
-// import { UserContext } from "../contexts/UserContext";
+import { UserContext } from "../contexts/UserContext";
 
 interface SignupForm {
   firstName: string;
@@ -35,7 +34,12 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [values, setValues] = useState<SignupForm>(initValues);
   const [errors, setErrors] = useState<Partial<SignupForm>>({});
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) navigate("/");
+  }, [user, navigate]);
 
   const handleShowPassword = () => setShowPassword((prev) => !prev);
 

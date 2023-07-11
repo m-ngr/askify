@@ -3,10 +3,26 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Link from "@mui/material/Link";
+import { useContext } from "react";
+import { UserActions, UserContext } from "../contexts/UserContext";
+import { fetcher } from "../utils/fetcher";
 
 export default function Navbar() {
+  const { user, userDispatch } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  function logout() {
+    fetcher("/users/logout", {
+      method: "POST",
+      credentials: "include",
+    }).finally(() => {
+      userDispatch({ type: UserActions.Reset });
+      navigate("/login");
+    });
+  }
+
   let NavButtons = [
     <Button color="inherit" component={RouterLink} to="login" key="login">
       Login
@@ -15,6 +31,17 @@ export default function Navbar() {
       Signup
     </Button>,
   ];
+
+  if (user) {
+    NavButtons = [
+      <Button color="inherit" component={RouterLink} to="/" key="profile">
+        {user.firstName}
+      </Button>,
+      <Button color="inherit" onClick={logout} key="logout">
+        Logout
+      </Button>,
+    ];
+  }
 
   return (
     <Box sx={{ flexGrow: 1, maxHeight: "65px" }}>

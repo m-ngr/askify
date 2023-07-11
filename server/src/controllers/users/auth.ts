@@ -19,30 +19,28 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
 
 export async function login(req: Request, res: Response, next: NextFunction) {
   try {
-    const { login, password } = req.body;
+    const { login, password, remember } = req.body;
     const user = await User.findOne({
       $or: [{ username: login }, { email: login }],
     }).select("+email +password");
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ error: { field: "login", message: "User not found" } });
+      return res.status(404).json({ errors: { login: "User not found" } });
     }
 
     if (!(await user.comparePassword(password))) {
-      return res
-        .status(401)
-        .json({ error: { field: "password", message: "Invalid password" } });
+      return res.status(401).json({ errors: { password: "Invalid password" } });
     }
+
+    const maxAge = remember ? 15 * 24 * 60 * 60 * 1000 : undefined; // 15 days
 
     res.cookie("token", jwtSign({ userId: user.id }), {
       httpOnly: true,
       sameSite: "strict",
-      maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
+      maxAge,
     });
 
-    return res.status(200).json({ user });
+    return res.json({ user });
   } catch (error) {
     next(error);
   }
