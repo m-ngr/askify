@@ -60,8 +60,9 @@ export async function getProfile(
     const handle = req.params.handle;
 
     const user = await (isValidObjectId(handle)
-      ? User.findById(handle)
-      : User.findOne({ username: handle }));
+      ? User.findById(handle).populate("categories")
+      : User.findOne({ username: handle })
+    ).populate("categories");
 
     if (!user) {
       return res.status(404).json({ error: "user not found" });
@@ -147,6 +148,10 @@ export async function askUser(req: Request, res: Response, next: NextFunction) {
     const { question, isAnonymous, category } = req.body;
     const handle = req.params.handle.trim();
 
+    if (!question) {
+      return res.status(400).json({ error: "Question is required" });
+    }
+
     if (category && !isValidObjectId(category)) {
       return res.status(400).json({ error: "Invalid category id" });
     }
@@ -161,19 +166,13 @@ export async function askUser(req: Request, res: Response, next: NextFunction) {
 
     if (isAnonymous && !toUser.allowAnonymous) {
       return res.status(400).json({
-        error: {
-          field: "isAnonymous",
-          message: "User does not allow anonymous questions",
-        },
+        error: "User does not allow anonymous questions",
       });
     }
 
     if (category && !toUser.hasCategory(category)) {
       return res.status(400).json({
-        error: {
-          field: "category",
-          message: "User does not have such category",
-        },
+        error: "User does not have such category",
       });
     }
 
@@ -182,7 +181,7 @@ export async function askUser(req: Request, res: Response, next: NextFunction) {
       toUser: toUser.id,
       question,
       isAnonymous,
-      category,
+      category: category ? category : undefined,
     });
 
     return res.status(201).json({ message: "Question created successfully" });

@@ -8,7 +8,8 @@ import Comment from "../../models/Comment";
 
 export function getInfo(req: Request, res: Response, next: NextFunction) {
   try {
-    return res.json(req.user);
+    const { categories, ...user } = req.user!.toJSON();
+    return res.json(user);
   } catch (error) {
     next(error);
   }

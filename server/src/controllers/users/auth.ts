@@ -22,7 +22,9 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     const { login, password, remember } = req.body;
     const user = await User.findOne({
       $or: [{ username: login }, { email: login }],
-    }).select("+email +password");
+    })
+      .select("+email +password")
+      .populate("categories");
 
     if (!user) {
       return res.status(404).json({ errors: { login: "User not found" } });

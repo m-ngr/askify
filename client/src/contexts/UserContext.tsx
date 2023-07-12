@@ -7,10 +7,12 @@ interface User {
   lastName: string;
   username: string;
   email: string;
+  avatar: string;
+  bio: string;
   followers: number;
   following: number;
   allowAnonymous: boolean;
-  categories: string[]; // may be deleted
+  categories: { id: string; name: string }[];
 }
 
 export enum UserActions {
@@ -34,7 +36,7 @@ const userReducer = (state: State, action: Action): State => {
       return null;
     case UserActions.Update:
       if (state === null) {
-        return null;
+        return action.payload as User;
       }
       return { ...state, ...action.payload };
     default:
@@ -57,10 +59,19 @@ export const UserProvider = ({ children }) => {
     async function loadUser() {
       const res = await fetcher("/users/me", { credentials: "include" });
       const json = await res.json();
-      if (res.ok) userDispatch({ type: UserActions.Set, payload: json });
+      if (res.ok) userDispatch({ type: UserActions.Update, payload: json });
+    }
+
+    async function loadCats() {
+      const res = await fetcher("/users/me/categories", {
+        credentials: "include",
+      });
+      const json = await res.json();
+      if (res.ok) userDispatch({ type: UserActions.Update, payload: json });
     }
 
     loadUser();
+    loadCats();
   }, [userDispatch]);
 
   return (
