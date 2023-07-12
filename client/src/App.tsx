@@ -10,6 +10,7 @@ import RootLayout from "./layouts/RootLayout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { UserProvider } from "./contexts/UserContext";
+import Profile from "./pages/Profile";
 
 export default function App() {
   const router = createBrowserRouter(
@@ -18,6 +19,7 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="signup" element={<Signup />} />
         <Route path="login" element={<Login />} />
+        <Route path=":username" element={<Profile />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     )

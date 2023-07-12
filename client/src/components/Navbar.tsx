@@ -34,7 +34,12 @@ export default function Navbar() {
 
   if (user) {
     NavButtons = [
-      <Button color="inherit" component={RouterLink} to="/" key="profile">
+      <Button
+        color="inherit"
+        component={RouterLink}
+        to={`/${user.username}`}
+        key="profile"
+      >
         {user.firstName}
       </Button>,
       <Button color="inherit" onClick={logout} key="logout">
