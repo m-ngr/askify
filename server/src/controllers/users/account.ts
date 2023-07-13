@@ -160,7 +160,8 @@ export async function getInbox(
     if ("cat" in req.query) {
       const cat = (req.query.cat as string).trim().toLowerCase();
 
-      if (cat === "" || cat === "general") {
+      if (cat === "") {
+      } else if (cat === "none") {
         filter.category = undefined;
       } else if (isValidObjectId(cat)) {
         filter.category = cat;
