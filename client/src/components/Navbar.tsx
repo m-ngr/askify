@@ -37,6 +37,14 @@ export default function Navbar() {
       <Button
         color="inherit"
         component={RouterLink}
+        to={"/me/inbox"}
+        key="inbox"
+      >
+        Inbox
+      </Button>,
+      <Button
+        color="inherit"
+        component={RouterLink}
         to={`/${user.username}`}
         key="profile"
       >
