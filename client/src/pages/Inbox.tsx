@@ -10,9 +10,6 @@ import {
   FormControlLabel,
   Switch,
   Container,
-  List,
-  ListItem,
-  ListItemText,
   Box,
   Grid,
   Tab,
@@ -23,6 +20,7 @@ import {
 } from "@mui/material";
 import { UserContext } from "../contexts/UserContext";
 import { fetcher } from "../utils/fetcher";
+import QuestionList from "../components/QuestionList";
 
 export default function Inbox() {
   const { user } = useContext(UserContext);
@@ -197,13 +195,12 @@ export default function Inbox() {
         ))}
       </Tabs>
 
-      <List sx={{ mt: 4, width: "100%" }}>
-        {questions.map((question) => (
-          <ListItem key={question.id} disableGutters sx={{ mb: 2 }}>
-            <ListItemText primary={question.question} />
-          </ListItem>
-        ))}
-      </List>
+      <QuestionList
+        data={questions}
+        setData={setQuestions}
+        view="inbox"
+        viewer="owner"
+      />
 
       {loading && <CircularProgress />}
 
