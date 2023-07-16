@@ -61,6 +61,7 @@ questionSchema.set("toJSON", {
   transform: function (doc, ret) {
     ret.id = ret._id;
 
+    if (!("category" in ret)) ret.category = "";
     if (ret.isAnonymous) ret.fromUser = null;
 
     delete ret._id;

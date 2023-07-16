@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { Search as SearchIcon } from "@mui/icons-material";
 import {
   Typography,
@@ -19,104 +19,51 @@ import {
   Button,
 } from "@mui/material";
 import { UserContext } from "../contexts/UserContext";
-import { fetcher } from "../utils/fetcher";
 import QuestionList from "../components/QuestionList";
+import {
+  InboxActions,
+  InboxContext,
+  InboxProvider,
+} from "../contexts/InboxContext";
+import InfiniteScroll from "../components/InfiniteScroll";
 
-export default function Inbox() {
+function InboxPage() {
   const { user } = useContext(UserContext);
   const [text, setText] = useState("");
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState("newest");
-  const [category, setCategory] = useState("");
-  const [isRegex, setIsRegex] = useState(false);
-  const [page, setPage] = useState(1);
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const observerElement = useRef<HTMLDivElement>(null);
+  const { inbox, inboxDispatch } = useContext(InboxContext);
+
+  const { sort, category, isRegex, questions, loading, hasMore } = inbox;
 
   // on change handlers
   const changeText = (e) => setText(e.target.value);
   function changeQuery() {
-    setPage(1);
-    setQuery(text);
+    inboxDispatch({
+      type: InboxActions.Update,
+      payload: { query: text, page: 1 },
+    });
   }
   const changeSort = (e) => {
-    setPage(1);
-    setSort(e.target.value);
+    inboxDispatch({
+      type: InboxActions.Update,
+      payload: { sort: e.target.value, page: 1 },
+    });
   };
   const changeRegex = (e) => {
-    setPage(1);
-    setIsRegex(e.target.checked);
+    inboxDispatch({
+      type: InboxActions.Update,
+      payload: { isRegex: e.target.checked, page: 1 },
+    });
   };
   const changeCategory = (e, cat) => {
-    setPage(1);
-    setCategory(cat);
+    inboxDispatch({
+      type: InboxActions.Update,
+      payload: { category: cat, page: 1 },
+    });
   };
 
-  useEffect(() => {
-    const controller = new AbortController();
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const regex = isRegex ? "&regex" : "";
-        const qs = `q=${query}${regex}&sort=${sort}&cat=${category}&page=${page}`;
-
-        const response = await fetcher(`/users/me/inbox?${qs}`, {
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal,
-        });
-
-        const json = await response.json();
-        if (response.ok) {
-          if (page === 1) {
-            setQuestions(json.questions);
-          } else {
-            setQuestions((prev) => [...prev, ...json.questions]);
-          }
-          setHasMore(Boolean(json.questions.length));
-        } else {
-          setHasMore(false);
-        }
-      } catch {
-        setHasMore(false);
-      }
-
-      setLoading(false);
-    }
-
-    fetchData();
-
-    return () => controller.abort();
-  }, [category, isRegex, page, query, sort]);
-
-  const changePage = useCallback(() => {
-    if (hasMore && !loading) {
-      setPage((prev) => prev + 1);
-    }
-  }, [hasMore, loading]);
-
-  useEffect(() => {
-    const options: IntersectionObserverInit = {
-      root: null,
-      rootMargin: "0px",
-      threshold: 1.0,
-    };
-
-    const handleObserver = (entries: IntersectionObserverEntry[]) => {
-      const target: any = entries[0];
-      if (target.isIntersecting) {
-        changePage();
-      }
-    };
-
-    if (observerElement.current) {
-      const observer = new IntersectionObserver(handleObserver, options);
-      observer.observe(observerElement.current);
-      return () => observer.disconnect();
-    }
-  }, [changePage]);
+  const fetchNext = useCallback(() => {
+    inboxDispatch({ type: InboxActions.FetchNext });
+  }, [inboxDispatch]);
 
   return (
     <Container
@@ -185,38 +132,42 @@ export default function Inbox() {
         variant="scrollable"
         scrollButtons
         allowScrollButtonsMobile
-        aria-label="scrollable force tabs example"
+        aria-label="scrollable force tabs"
         sx={{ p: 1, maxWidth: "100%", mt: 2, bgcolor: "background.paper" }}
       >
-        <Tab label="All" value="" />
-        <Tab label="General" value={"none"} />
+        <Tab label="All" value="all" />
+        <Tab label="General" value="" />
         {user?.categories?.map((cat) => (
           <Tab label={cat.name} value={cat.id} key={cat.id} />
         ))}
       </Tabs>
 
-      <QuestionList
-        data={questions}
-        setData={setQuestions}
-        view="inbox"
-        viewer="owner"
-      />
-
-      {loading && <CircularProgress />}
-
-      {hasMore && (
-        <div ref={observerElement} onClick={changePage}>
+      <InfiniteScroll
+        loading={loading}
+        hasMore={hasMore}
+        fetchMore={fetchNext}
+        loadingElement={<CircularProgress />}
+        loadMoreElement={
           <Button variant="contained" color="primary" sx={{ mt: 2 }}>
             Load More
           </Button>
-        </div>
-      )}
-
-      {!hasMore && (
-        <Typography variant="subtitle1" color="GrayText">
-          No More Content
-        </Typography>
-      )}
+        }
+        endElement={
+          <Typography variant="subtitle1" color="GrayText">
+            No More Content
+          </Typography>
+        }
+      >
+        <QuestionList data={questions} view="inbox" viewer="owner" />
+      </InfiniteScroll>
     </Container>
+  );
+}
+
+export default function Inbox() {
+  return (
+    <InboxProvider>
+      <InboxPage />
+    </InboxProvider>
   );
 }

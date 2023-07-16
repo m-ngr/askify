@@ -160,8 +160,8 @@ export async function getInbox(
     if ("cat" in req.query) {
       const cat = (req.query.cat as string).trim().toLowerCase();
 
-      if (cat === "") {
-      } else if (cat === "none") {
+      if (cat === "all") {
+      } else if (cat === "") {
         filter.category = undefined;
       } else if (isValidObjectId(cat)) {
         filter.category = cat;
@@ -173,7 +173,9 @@ export async function getInbox(
     const questions = await Question.find(filter)
       .sort({ createdAt: sort === "oldest" ? 1 : -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .select("fromUser question isAnonymous category createdAt")
+      .populate("fromUser", "firstName lastName username avatar");
 
     res.json({ page, questions });
   } catch (error) {

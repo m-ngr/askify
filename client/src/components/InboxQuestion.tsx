@@ -15,12 +15,26 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  TextField,
+  Slide,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckIcon from "@mui/icons-material/Check";
+import SendIcon from "@mui/icons-material/Send";
 import { UserContext } from "../contexts/UserContext";
+import { InboxContext } from "../contexts/InboxContext";
+import { TransitionProps } from "@mui/material/transitions";
+
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement;
+  },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 interface QuestionCardProps {
   id: string;
@@ -29,7 +43,6 @@ interface QuestionCardProps {
   date: string;
   category: { id: string; name: string };
   question: string;
-  setQuestions: any;
 }
 
 const InboxQuestion: React.FC<QuestionCardProps> = ({
@@ -39,70 +52,68 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
   date,
   category,
   question,
-  setQuestions,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
-  const [cat, setCat] = useState(category.id);
-  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
+  const [answerDialogOpen, setAnswerDialogOpen] = useState(false);
+  const [userAnswer, setUserAnswer] = useState("");
   const { user } = useContext(UserContext);
+  const { deleteQuestion, changeQuestionCategory, answerQuestion } =
+    useContext(InboxContext);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  const handleMenuClose = () => setAnchorEl(null);
 
-  const handleMoveClick = () => {
+  const handleMoveMenuOpen = () => {
     setMoveMenuOpen(true);
     handleMenuClose();
   };
 
-  const handleMoveMenuClose = () => {
-    setMoveMenuOpen(false);
-  };
+  const handleMoveMenuClose = () => setMoveMenuOpen(false);
 
   const handleCategorySelect = (category: string) => {
-    setQuestions((arr: any[]) =>
-      arr.map((q) => {
-        if (q.id === id) q.category = category;
-        return q;
-      })
-    );
-    setCat(category);
+    changeQuestionCategory(id, category);
     handleMoveMenuClose();
   };
 
-  const handleConfirmationOpen = () => {
-    setConfirmationOpen(true);
+  const handleDeleteMenuOpen = () => {
+    setDeleteMenuOpen(true);
     handleMenuClose();
   };
 
-  const handleConfirmationClose = () => {
-    setConfirmationOpen(false);
-  };
+  const handleDeleteMenuClose = () => setDeleteMenuOpen(false);
 
   const handleDelete = () => {
-    setQuestions((arr: any[]) => arr.filter((q) => q.id !== id));
-    handleConfirmationClose();
+    deleteQuestion(id);
+    handleDeleteMenuClose();
   };
 
-  const renderCategoryMenuItem = (category) => (
-    <MenuItem
-      key={category.id}
-      onClick={() => handleCategorySelect(category.id)}
-      selected={category.id === cat}
-    >
-      <ListItemIcon>{category.id === cat && <CheckIcon />}</ListItemIcon>
+  const handleAnswerDialogOpen = () => setAnswerDialogOpen(true);
+  const handleAnswerDialogClose = () => setAnswerDialogOpen(false);
 
-      {category.name}
+  const handleAnswerSubmit = () => {
+    answerQuestion(id, userAnswer);
+    setAnswerDialogOpen(false);
+  };
+
+  const renderCategoryMenuItem = (cat: { id: string; name: string }) => (
+    <MenuItem
+      key={cat.id}
+      onClick={() => handleCategorySelect(cat.id)}
+      selected={cat.id === category.id}
+    >
+      <ListItemIcon>{cat.id === category.id && <CheckIcon />}</ListItemIcon>
+
+      {cat.name}
     </MenuItem>
   );
 
   return (
-    <Card sx={{ width: "100%" }}>
+    <Card sx={{ width: "100%", mx: { xs: 0, md: 1, lg: 2, xlg: 4 } }}>
       <CardHeader
         avatar={<Avatar alt={name} src={avatar} />}
         title={name}
@@ -124,13 +135,13 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
             >
-              <MenuItem onClick={handleMoveClick}>
+              <MenuItem onClick={handleMoveMenuOpen}>
                 <ListItemIcon>
                   <MoveToInboxIcon />
                 </ListItemIcon>
                 Move
               </MenuItem>
-              <MenuItem onClick={handleConfirmationOpen}>
+              <MenuItem onClick={handleDeleteMenuOpen}>
                 <ListItemIcon>
                   <DeleteIcon />
                 </ListItemIcon>
@@ -145,7 +156,10 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
         <Typography variant="body1">{question}</Typography>
       </CardContent>
 
-      <CardActions>
+      <CardActions sx={{ justifyContent: "flex-end" }}>
+        <IconButton aria-label="Answer" onClick={handleAnswerDialogOpen}>
+          <SendIcon color="primary" />
+        </IconButton>
         <Dialog
           open={moveMenuOpen}
           onClose={handleMoveMenuClose}
@@ -158,7 +172,7 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
             {user?.categories?.map((cat) => renderCategoryMenuItem(cat))}
           </DialogContent>
         </Dialog>
-        <Dialog open={confirmationOpen} onClose={handleConfirmationClose}>
+        <Dialog open={deleteMenuOpen} onClose={handleDeleteMenuClose}>
           <DialogTitle>Delete Question</DialogTitle>
           <DialogContent>
             <Typography>
@@ -166,11 +180,56 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
             </Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleConfirmationClose} color="primary">
+            <Button onClick={handleDeleteMenuClose} color="primary">
               Cancel
             </Button>
             <Button onClick={handleDelete} color="primary">
               Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog
+          fullScreen
+          open={answerDialogOpen}
+          onClose={handleAnswerDialogClose}
+          TransitionComponent={Transition}
+        >
+          <DialogTitle>Answer Question</DialogTitle>
+
+          <DialogContent>
+            <CardHeader
+              avatar={<Avatar alt={name} src={avatar} />}
+              title={name}
+              subheader={`${date} - ${category.name}`}
+            />
+
+            <CardContent>
+              <Typography variant="subtitle1">{question} </Typography>
+            </CardContent>
+
+            <TextField
+              label="Answer"
+              multiline
+              rows={6}
+              fullWidth
+              value={userAnswer}
+              onChange={(e) => setUserAnswer(e.target.value)}
+              margin="normal"
+            />
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={handleAnswerDialogClose} color="primary">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAnswerSubmit}
+              color="primary"
+              variant="contained"
+              disabled={!Boolean(userAnswer.trim())}
+            >
+              Answer
             </Button>
           </DialogActions>
         </Dialog>
