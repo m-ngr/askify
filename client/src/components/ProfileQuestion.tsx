@@ -33,6 +33,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { TransitionProps } from "@mui/material/transitions";
 import { ProfileActions, ProfileContext } from "../contexts/ProfileContext";
 import { fetcher } from "../utils/fetcher";
+import { Viewer } from "./QuestionList";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -53,6 +54,7 @@ interface QuestionCardProps {
   answer: string;
   likes: number;
   comments: number;
+  viewer: Viewer;
 }
 
 const InboxQuestion: React.FC<QuestionCardProps> = ({
@@ -65,6 +67,7 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
   answer,
   likes,
   comments,
+  viewer,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [liked, setLiked] = useState(false);
@@ -105,6 +108,7 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
   }, [fetchLiked]);
 
   async function switchLike() {
+    if (viewer === "visitor") return;
     const method = liked ? "DELETE" : "POST";
     const res = await fetcher(`/questions/${id}/likes`, {
       method,
@@ -170,12 +174,13 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
   };
 
   const handleCommentDialogOpen = () => {
-    handleMenuClose();
+    if (viewer === "visitor") return;
     setCommentDialogOpen(true);
   };
   const handleCommentDialogClose = () => setCommentDialogOpen(false);
 
   const handleCommentSubmit = () => {
+    if (viewer === "visitor") return;
     async function addComment() {
       const res = await fetcher(`/questions/${id}/comments`, {
         method: "POST",
@@ -216,48 +221,50 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
         title={name}
         subheader={date + " - " + category.name}
         action={
-          <>
-            <IconButton
-              aria-label="more"
-              aria-controls="question-card-menu"
-              aria-haspopup="true"
-              onClick={handleMenuOpen}
-            >
-              <MoreVertIcon />
-            </IconButton>
-            <Menu
-              id="question-card-menu"
-              anchorEl={anchorEl}
-              keepMounted
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={handleAnswerDialogOpen}>
-                <ListItemIcon>
-                  <EditIcon />
-                </ListItemIcon>
-                Edit
-              </MenuItem>
-              <MenuItem onClick={handleEraseMenuOpen}>
-                <ListItemIcon>
-                  <ClearIcon />
-                </ListItemIcon>
-                Erase
-              </MenuItem>
-              <MenuItem onClick={handleMoveMenuOpen}>
-                <ListItemIcon>
-                  <MoveToInboxIcon />
-                </ListItemIcon>
-                Move
-              </MenuItem>
-              <MenuItem onClick={handleDeleteMenuOpen}>
-                <ListItemIcon>
-                  <DeleteIcon />
-                </ListItemIcon>
-                Delete
-              </MenuItem>
-            </Menu>
-          </>
+          viewer === "owner" && (
+            <>
+              <IconButton
+                aria-label="more"
+                aria-controls="question-card-menu"
+                aria-haspopup="true"
+                onClick={handleMenuOpen}
+              >
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                id="question-card-menu"
+                anchorEl={anchorEl}
+                keepMounted
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={handleAnswerDialogOpen}>
+                  <ListItemIcon>
+                    <EditIcon />
+                  </ListItemIcon>
+                  Edit
+                </MenuItem>
+                <MenuItem onClick={handleEraseMenuOpen}>
+                  <ListItemIcon>
+                    <ClearIcon />
+                  </ListItemIcon>
+                  Erase
+                </MenuItem>
+                <MenuItem onClick={handleMoveMenuOpen}>
+                  <ListItemIcon>
+                    <MoveToInboxIcon />
+                  </ListItemIcon>
+                  Move
+                </MenuItem>
+                <MenuItem onClick={handleDeleteMenuOpen}>
+                  <ListItemIcon>
+                    <DeleteIcon />
+                  </ListItemIcon>
+                  Delete
+                </MenuItem>
+              </Menu>
+            </>
+          )
         }
       />
 

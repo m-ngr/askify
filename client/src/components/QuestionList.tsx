@@ -89,6 +89,7 @@ function Question({ doc, view, viewer }: QuestionProps) {
         answer={answer}
         likes={likes}
         comments={comments}
+        viewer={viewer}
       />
     );
   }
