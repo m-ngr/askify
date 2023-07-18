@@ -256,6 +256,29 @@ export async function deleteAnswer(
   }
 }
 
+export async function isLiked(req: Request, res: Response, next: NextFunction) {
+  try {
+    const id = req.params.id.trim();
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ error: "Invalid answer ID" });
+    }
+
+    const [answer, like] = await Promise.all([
+      Question.findById(id, { likes: 1 }),
+      Like.exists({ question: id, user: req.user?.id }),
+    ]);
+
+    if (!answer) {
+      return res.status(404).json({ error: "Answer not found" });
+    }
+
+    res.json({ liked: Boolean(like), likes: answer.likes });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function like(req: Request, res: Response, next: NextFunction) {
   try {
     const id = req.params.id.trim();
@@ -271,8 +294,8 @@ export async function like(req: Request, res: Response, next: NextFunction) {
     }
 
     await Like.create({ user: req.user!.id, question: answer.id });
-    answer.likes += 1;
-    answer.save();
+
+    Question.findOneAndUpdate({ _id: id }, { $inc: { likes: 1 } }).exec();
 
     res.sendStatus(201);
   } catch (error: any) {

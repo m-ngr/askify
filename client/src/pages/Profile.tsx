@@ -1,50 +1,81 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { fetcher } from "../utils/fetcher";
+import { Search as SearchIcon } from "@mui/icons-material";
 import {
   Box,
   Typography,
   Avatar,
-  List,
-  ListItem,
-  ListItemText,
+  Tabs,
+  Tab,
+  Button,
+  CircularProgress,
+  Container,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Switch,
+  TextField,
 } from "@mui/material";
 import { UserContext } from "../contexts/UserContext";
 import AskForm from "../components/AskForm";
+import QuestionList, { Viewer } from "../components/QuestionList";
+import ProfileProvider, {
+  ProfileActions,
+  ProfileContext,
+} from "../contexts/ProfileContext";
+import InfiniteScroll from "../components/InfiniteScroll";
 
-/** @todo REFACTOR AND REMOVE DUPLICATION (UserContext.tsx) */
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  avatar: string;
-  bio: string;
-  followers: number;
-  following: number;
-  allowAnonymous: boolean;
-  categories: { id: string; name: string }[];
-}
-
-export default function Profile() {
+function ProfilePage() {
   const { user } = useContext(UserContext);
-  const { username } = useParams();
-  const [profile, setProfile] = useState<User>();
+  const [text, setText] = useState("");
+  const [viewer, setViewer] = useState<Viewer>("visitor");
+  const { profile, profileDispatch } = useContext(ProfileContext);
+  const { sort, category, isRegex, questions, loading, hasMore } = profile;
+
+  // on change handlers
+  const changeText = (e) => setText(e.target.value);
+
+  function changeQuery() {
+    profileDispatch({
+      type: ProfileActions.Update,
+      payload: { query: text, page: 1 },
+    });
+  }
+  const changeSort = (e) => {
+    profileDispatch({
+      type: ProfileActions.Update,
+      payload: { sort: e.target.value, page: 1 },
+    });
+  };
+  const changeRegex = (e) => {
+    profileDispatch({
+      type: ProfileActions.Update,
+      payload: { isRegex: e.target.checked, page: 1 },
+    });
+  };
+  const changeCategory = (e, cat) => {
+    profileDispatch({
+      type: ProfileActions.Update,
+      payload: { category: cat, page: 1 },
+    });
+  };
+
+  const fetchNext = useCallback(() => {
+    profileDispatch({ type: ProfileActions.FetchNext });
+  }, [profileDispatch]);
 
   useEffect(() => {
-    async function loadProfile() {
-      const res = await fetcher(`/users/${username}`);
-      const json = await res.json();
-      if (res.ok) return setProfile(json);
-      // should say that there was an error
-    }
-    // to be fixed
-    if (username === user?.username) {
-      setProfile(user!);
+    if (!user) return setViewer("visitor");
+    if (user.username === profile.user?.username) {
+      setViewer("owner");
     } else {
-      loadProfile();
+      setViewer("user");
     }
-  }, [username]);
+  }, [user, profile.user?.username]);
 
   return (
     <Box
@@ -58,51 +89,138 @@ export default function Profile() {
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: "20px" }}>
         <Avatar
-          src={profile?.avatar}
-          alt={`${profile?.firstName} Avatar`}
+          src={profile.user?.avatar}
+          alt={`${profile.user?.firstName} Avatar`}
           sx={{ width: 80, height: 80 }}
         />
 
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Typography variant="h6">
-            {profile?.firstName + " " + profile?.lastName}
+            {profile.user?.firstName + " " + profile.user?.lastName}
           </Typography>
 
           <Typography variant="subtitle1" color="text.secondary">
-            @{profile?.username}
+            @{profile.user?.username}
           </Typography>
         </Box>
       </Box>
 
       <Box sx={{ paddingLeft: "20px", paddingRight: "20px" }}>
-        <Typography variant="body1">{profile?.bio}</Typography>
+        <Typography variant="body1">{profile.user?.bio}</Typography>
       </Box>
 
-      {user && profile && (
+      {user && profile.user && (
         <AskForm
-          handle={profile.id}
-          allowAnonymous={profile.allowAnonymous}
-          categories={profile.categories ?? []}
+          handle={profile.user.id}
+          allowAnonymous={profile.user.allowAnonymous}
+          categories={profile.user.categories ?? []}
         />
       )}
 
-      <Typography variant="h5" sx={{ textAlign: "center" }}>
-        Questions
-      </Typography>
+      <Container
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          marginTop: "20px",
+          flexGrow: 1,
+          p: 0,
+        }}
+      >
+        <Typography variant="h5" align="center" sx={{ mb: 4 }}>
+          Answers
+        </Typography>
 
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <List sx={{ width: "100%", maxWidth: 800, background: "#ccc3" }}>
-          <ListItem>
-            <ListItemText primary="Question 1" secondary="By John Doe" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="Question 2" secondary="By John Doe" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="Question 3" secondary="By John Doe" />
-          </ListItem>
-        </List>
-      </Box>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs>
+            <Box display="flex" alignItems="center">
+              <TextField
+                label="Search"
+                fullWidth
+                value={text}
+                onChange={changeText}
+                sx={{ minWidth: "220px" }}
+              />
+              <IconButton color="primary" onClick={changeQuery}>
+                <SearchIcon />
+              </IconButton>
+            </Box>
+          </Grid>
+
+          <Grid item xs={12} sm={2} md={2}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isRegex}
+                  onChange={changeRegex}
+                  color="primary"
+                />
+              }
+              label="Regex"
+            />
+          </Grid>
+
+          <Grid item xs={12} sm={4} md={2}>
+            <FormControl fullWidth>
+              <InputLabel id="sort-by-label">Sort By</InputLabel>
+              <Select
+                labelId="sort-by-label"
+                id="sort-by"
+                value={sort}
+                label="Sort By"
+                onChange={changeSort}
+              >
+                <MenuItem value="newest">Newest</MenuItem>
+                <MenuItem value="oldest">Oldest</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+
+        <Tabs
+          value={category}
+          onChange={changeCategory}
+          variant="scrollable"
+          scrollButtons
+          allowScrollButtonsMobile
+          aria-label="scrollable force tabs"
+          sx={{ p: 1, maxWidth: "100%", mt: 2, bgcolor: "background.paper" }}
+        >
+          <Tab label="All" value="all" />
+          <Tab label="General" value="" />
+          {profile.user?.categories?.map((cat) => (
+            <Tab label={cat.name} value={cat.id} key={cat.id} />
+          ))}
+        </Tabs>
+
+        <InfiniteScroll
+          loading={loading}
+          hasMore={hasMore}
+          fetchMore={fetchNext}
+          loadingElement={<CircularProgress />}
+          loadMoreElement={
+            <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+              Load More
+            </Button>
+          }
+          endElement={
+            <Typography variant="subtitle1" color="GrayText">
+              No More Content
+            </Typography>
+          }
+        >
+          <QuestionList data={questions} view="profile" viewer={viewer} />
+        </InfiniteScroll>
+      </Container>
     </Box>
+  );
+}
+
+export default function Profile() {
+  const { username } = useParams();
+  return (
+    <ProfileProvider username={username}>
+      <ProfilePage />
+    </ProfileProvider>
   );
 }

@@ -3,11 +3,14 @@ import InboxQuestion from "./InboxQuestion";
 import dateToDuration from "../utils/dateToDuration";
 import { useContext } from "react";
 import { UserContext } from "../contexts/UserContext";
+import ProfileQuestion from "./ProfileQuestion";
+
+export type Viewer = "owner" | "user" | "visitor";
 
 interface QuestionListProps {
   data: any[]; //to be updated
   view: "inbox" | "profile" | "search";
-  viewer: "owner" | "user" | "visitor";
+  viewer: Viewer;
 }
 
 export default function QuestionList({
@@ -33,7 +36,16 @@ interface QuestionProps {
 }
 
 function Question({ doc, view, viewer }: QuestionProps) {
-  const { createdAt, fromUser, id, question, category } = doc;
+  const {
+    createdAt,
+    fromUser,
+    id,
+    question,
+    category,
+    answer,
+    likes,
+    comments,
+  } = doc;
   const { user } = useContext(UserContext);
 
   let name = "Deleted User";
@@ -61,6 +73,22 @@ function Question({ doc, view, viewer }: QuestionProps) {
         avatar={avatar}
         category={cat}
         question={question}
+      />
+    );
+  }
+
+  if (view === "profile") {
+    return (
+      <ProfileQuestion
+        id={id}
+        name={name}
+        date={date}
+        avatar={avatar}
+        category={cat}
+        question={question}
+        answer={answer}
+        likes={likes}
+        comments={comments}
       />
     );
   }
