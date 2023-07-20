@@ -12,6 +12,7 @@ import Signup from "./pages/Signup";
 import { UserProvider } from "./contexts/UserContext";
 import Profile from "./pages/Profile";
 import Inbox from "./pages/Inbox";
+import Question from "./pages/Question";
 
 export default function App() {
   const router = createBrowserRouter(
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="signup" element={<Signup />} />
         <Route path="login" element={<Login />} />
         <Route path="me/inbox" element={<Inbox />} />
+        <Route path="q/:id" element={<Question />} />
         <Route path=":username" element={<Profile />} />
         <Route path="*" element={<NotFound />} />
       </Route>

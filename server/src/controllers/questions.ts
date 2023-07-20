@@ -58,7 +58,10 @@ export async function readAnswer(
     return res.status(400).json({ error: "Invalid question ID" });
   }
 
-  const question = await Question.findById(id);
+  const question = await Question.findById(id)
+    .populate("fromUser", "firstName lastName username avatar")
+    .populate("toUser", "firstName lastName username avatar")
+    .populate("category", "name");
 
   if (!question) {
     return res.status(404).json({ error: "Question not found" });
@@ -382,6 +385,9 @@ export async function getComments(req: Request, res: Response) {
     return res.status(400).json({ error: "Invalid answer ID" });
   }
 
-  const comments = await Comment.find({ question: id });
+  const comments = await Comment.find({ question: id }).populate(
+    "user",
+    "firstName lastName username avatar"
+  );
   res.json(comments);
 }
