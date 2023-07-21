@@ -1,6 +1,7 @@
 import { Container, Paper } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const RootLayout = () => {
   return (
@@ -20,6 +21,7 @@ const RootLayout = () => {
       >
         <Outlet />
       </Container>
+      <Footer />
     </Paper>
   );
 };
