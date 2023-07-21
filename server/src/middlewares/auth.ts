@@ -3,6 +3,7 @@ import { jwtVerify } from "../utils/jwt";
 import User from "../models/User";
 import { TokenExpiredError, VerifyErrors } from "jsonwebtoken";
 import { JwtAuth } from "../types";
+import config from "../config";
 
 export const authMiddleware: RequestHandler = async (req, res, next) => {
   const token = req.cookies?.token;
@@ -14,7 +15,7 @@ export const authMiddleware: RequestHandler = async (req, res, next) => {
   try {
     payload = jwtVerify(token);
   } catch (error) {
-    res.clearCookie("token");
+    res.clearCookie("token", config.cookieOptions());
     const verifyError = error as VerifyErrors;
     if (verifyError instanceof TokenExpiredError) {
       return res.status(401).json({ error: "Token expired." });
@@ -24,7 +25,7 @@ export const authMiddleware: RequestHandler = async (req, res, next) => {
 
   const user = await User.findById(payload.userId).select("+email +password");
   if (!user) {
-    res.clearCookie("token");
+    res.clearCookie("token", config.cookieOptions());
     return res.status(401).json({ error: "User not found." });
   }
   req.user = user;

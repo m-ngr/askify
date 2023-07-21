@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import User from "../../models/User";
 import { jwtSign } from "../../utils/jwt";
 import { mongooseErrors } from "../../utils/errors";
+import config from "../../config";
 
 export async function signup(req: Request, res: Response, next: NextFunction) {
   try {
@@ -36,11 +37,11 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     const maxAge = remember ? 15 * 24 * 60 * 60 * 1000 : undefined; // 15 days
 
-    res.cookie("token", jwtSign({ userId: user.id }), {
-      httpOnly: true,
-      sameSite: "strict",
-      maxAge,
-    });
+    res.cookie(
+      "token",
+      jwtSign({ userId: user.id }),
+      config.cookieOptions({ maxAge })
+    );
 
     return res.json({ user });
   } catch (error) {
@@ -49,6 +50,6 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 }
 
 export function logout(req: Request, res: Response) {
-  res.clearCookie("token");
+  res.clearCookie("token", config.cookieOptions());
   res.sendStatus(204);
 }
