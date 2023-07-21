@@ -13,7 +13,7 @@ const development: Config = {
 };
 
 const production: Config = {
-  origin: "https://askify.onrender.com",
+  origin: "https://askify-app.onrender.com",
   cookieOptions(options?: CookieOptions) {
     return { httpOnly: true, secure: true, sameSite: "none", ...options };
   },
