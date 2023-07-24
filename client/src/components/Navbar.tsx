@@ -7,17 +7,14 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Link from "@mui/material/Link";
 import { useContext } from "react";
 import { UserActions, UserContext } from "../contexts/UserContext";
-import { fetcher } from "../utils/fetcher";
+import { api } from "../api";
 
 export default function Navbar() {
   const { user, userDispatch } = useContext(UserContext);
   const navigate = useNavigate();
 
   function logout() {
-    fetcher("/users/logout", {
-      method: "POST",
-      credentials: "include",
-    }).finally(() => {
+    api.logout().finally(() => {
       userDispatch({ type: UserActions.Reset });
       navigate("/login");
     });

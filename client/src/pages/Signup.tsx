@@ -9,10 +9,10 @@ import { useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Link from "@mui/material/Link";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { fetcher } from "../utils/fetcher";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link as RouterLink } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
+import { api } from "../api";
 
 interface SignupForm {
   firstName: string;
@@ -52,11 +52,7 @@ export default function SignUp() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const response = await fetcher("/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
+    const { response, data } = await api.signup(values);
 
     if (response.ok) return navigate("/login");
 
@@ -65,8 +61,7 @@ export default function SignUp() {
       return;
     }
 
-    const json = await response.json();
-    setErrors(json.errors);
+    setErrors(data.errors);
   };
 
   return (

@@ -1,5 +1,5 @@
 import { createContext, useEffect, useReducer } from "react";
-import { fetcher } from "../utils/fetcher";
+import { api } from "../api";
 
 interface User {
   id: string;
@@ -57,17 +57,15 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     async function loadUser() {
-      const res = await fetcher("/users/me", { credentials: "include" });
-      const json = await res.json();
-      if (res.ok) userDispatch({ type: UserActions.Update, payload: json });
+      const { response, data } = await api.loadUser();
+      if (response.ok)
+        userDispatch({ type: UserActions.Update, payload: data });
     }
 
     async function loadCats() {
-      const res = await fetcher("/users/me/categories", {
-        credentials: "include",
-      });
-      const json = await res.json();
-      if (res.ok) userDispatch({ type: UserActions.Update, payload: json });
+      const { response, data } = await api.loadCategories();
+      if (response.ok)
+        userDispatch({ type: UserActions.Update, payload: data });
     }
 
     loadUser();
