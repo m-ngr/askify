@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 
 import { FormEvent, useState } from "react";
-import { fetcher } from "../utils/fetcher";
+import { api } from "../api";
 
 interface AskFormProps {
   handle: string;
@@ -45,14 +45,8 @@ export default function AskForm({
       isAnonymous: Boolean(data.get("isAnonymous")),
     };
 
-    const response = await fetcher(`/users/${handle}/questions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(info),
-      credentials: "include",
-    });
+    const { response, data: json } = await api.askQuestion(handle, info);
 
-    const json = await response.json();
     if (!response.ok) return setError(json.error);
     setQuestion("");
   };

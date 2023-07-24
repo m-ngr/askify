@@ -1,5 +1,5 @@
 import { createContext, useEffect, useReducer } from "react";
-import { fetcher } from "../utils/fetcher";
+import { api } from "../api";
 
 interface User {
   id: string;
@@ -130,14 +130,14 @@ export const ProfileProvider = ({ children, username }) => {
 
     async function loadProfile() {
       try {
-        const res = await fetcher(`/users/${username}`, {
+        const { response, data } = await api.loadProfile(username, {
           signal: controller.signal,
         });
-        const json = await res.json();
-        if (res.ok) {
+
+        if (response.ok) {
           profileDispatch({
             type: ProfileActions.Update,
-            payload: { user: json },
+            payload: { user: data },
           });
         }
       } catch {}
@@ -158,33 +158,32 @@ export const ProfileProvider = ({ children, username }) => {
           payload: { loading: true },
         });
 
-        const regex = isRegex ? "&regex" : "";
-        const qs = `q=${query}${regex}&sort=${sort}&cat=${category}&page=${page}`;
-
-        const response = await fetcher(`/users/${username}/questions?${qs}`, {
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal,
-        });
-
-        const json = await response.json();
+        const { response, data } = await api.getUserAnswers(
+          username,
+          query,
+          isRegex,
+          sort,
+          category,
+          page,
+          { signal: controller.signal }
+        );
 
         if (response.ok) {
           if (page === 1) {
             profileDispatch({
               type: ProfileActions.Update,
-              payload: { questions: json.questions },
+              payload: { questions: data.questions },
             });
           } else {
             profileDispatch({
               type: ProfileActions.AppendQuestions,
-              payload: json.questions,
+              payload: data.questions,
             });
           }
 
           profileDispatch({
             type: ProfileActions.Update,
-            payload: { hasMore: Boolean(json.questions.length) },
+            payload: { hasMore: Boolean(data.questions.length) },
           });
         } else {
           profileDispatch({
@@ -211,26 +210,18 @@ export const ProfileProvider = ({ children, username }) => {
   }, [category, isRegex, page, query, sort, username]);
 
   async function deleteQuestion(id: string) {
-    const res = await fetcher(`/questions/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    const { response } = await api.deleteQuestion(id);
 
-    if (res.ok) {
+    if (response.ok) {
       profileDispatch({ type: ProfileActions.RemoveQuestion, payload: { id } });
     }
     // should handle errors ^_^
   }
 
   async function answerQuestion(id: string, answer: string) {
-    const res = await fetcher(`/questions/${id}/answer`, {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answer }),
-    });
+    const { response } = await api.answerQuestion(id, answer);
 
-    if (res.ok) {
+    if (response.ok) {
       profileDispatch({
         type: ProfileActions.UpdateQuestion,
         payload: { id, update: { answer } },
@@ -240,12 +231,9 @@ export const ProfileProvider = ({ children, username }) => {
   }
 
   async function deleteAnswer(id: string) {
-    const res = await fetcher(`/questions/${id}/answer`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    const { response } = await api.deleteAnswer(id);
 
-    if (res.ok) {
+    if (response.ok) {
       profileDispatch({
         type: ProfileActions.RemoveQuestion,
         payload: { id },
@@ -255,14 +243,9 @@ export const ProfileProvider = ({ children, username }) => {
   }
 
   async function changeQuestionCategory(id: string, category: string) {
-    const res = await fetcher(`/questions/${id}/category`, {
-      headers: { "Content-Type": "application/json" },
-      method: "PUT",
-      credentials: "include",
-      body: JSON.stringify({ category }),
-    });
+    const { response } = await api.changeQuestionCategory(id, category);
 
-    if (res.ok) {
+    if (response.ok) {
       profileDispatch({
         type: ProfileActions.UpdateQuestion,
         payload: { id, update: { category } },

@@ -32,8 +32,8 @@ import { UserContext } from "../contexts/UserContext";
 import { Link as RouterLink } from "react-router-dom";
 import { TransitionProps } from "@mui/material/transitions";
 import { ProfileActions, ProfileContext } from "../contexts/ProfileContext";
-import { fetcher } from "../utils/fetcher";
 import { Viewer } from "./QuestionList";
+import { api } from "../api";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -89,16 +89,12 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
   } = useContext(ProfileContext);
 
   const fetchLiked = useCallback(async () => {
-    const res = await fetcher(`/questions/${id}/likes`, {
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    });
-    const json = await res.json();
-    if (res.ok) {
-      setLiked(json.liked);
+    const { response, data } = await api.isLiked(id);
+    if (response.ok) {
+      setLiked(data.liked);
       profileDispatch({
         type: ProfileActions.UpdateQuestion,
-        payload: { id, update: { likes: json.likes } },
+        payload: { id, update: { likes: data.likes } },
       });
     }
   }, [id, profileDispatch]);
@@ -109,14 +105,9 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
 
   async function switchLike() {
     if (viewer === "visitor") return;
-    const method = liked ? "DELETE" : "POST";
-    const res = await fetcher(`/questions/${id}/likes`, {
-      method,
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (res.ok) setLiked((prev) => !prev);
+    const request = liked ? api.unlikeAnswer : api.likeAnswer;
+    const { response } = await request(id);
+    if (response.ok) setLiked((prev) => !prev);
     fetchLiked();
   }
 
@@ -181,24 +172,17 @@ const InboxQuestion: React.FC<QuestionCardProps> = ({
 
   const handleCommentSubmit = () => {
     if (viewer === "visitor") return;
-    async function addComment() {
-      const res = await fetcher(`/questions/${id}/comments`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: userComment }),
-      });
-
+    async function fetchComment() {
+      const { response } = await api.addComment(id, userComment);
       setUserComment("");
-
-      if (res.ok) {
+      if (response.ok) {
         profileDispatch({
           type: ProfileActions.UpdateQuestion,
           payload: { id, update: { comments: comments + 1 } },
         });
       }
     }
-    addComment();
+    fetchComment();
     setCommentDialogOpen(false);
   };
 

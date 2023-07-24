@@ -1,5 +1,5 @@
 import { createContext, useEffect, useReducer } from "react";
-import { fetcher } from "../utils/fetcher";
+import { api } from "../api";
 
 interface Inbox {
   query: string;
@@ -118,33 +118,31 @@ export const InboxProvider = ({ children }) => {
           payload: { loading: true },
         });
 
-        const regex = isRegex ? "&regex" : "";
-        const qs = `q=${query}${regex}&sort=${sort}&cat=${category}&page=${page}`;
-
-        const response = await fetcher(`/users/me/inbox?${qs}`, {
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal,
-        });
-
-        const json = await response.json();
+        const { response, data } = await api.getInbox(
+          query,
+          isRegex,
+          sort,
+          category,
+          page,
+          { signal: controller.signal }
+        );
 
         if (response.ok) {
           if (page === 1) {
             inboxDispatch({
               type: InboxActions.Update,
-              payload: { questions: json.questions },
+              payload: { questions: data.questions },
             });
           } else {
             inboxDispatch({
               type: InboxActions.AppendQuestions,
-              payload: json.questions,
+              payload: data.questions,
             });
           }
 
           inboxDispatch({
             type: InboxActions.Update,
-            payload: { hasMore: Boolean(json.questions.length) },
+            payload: { hasMore: Boolean(data.questions.length) },
           });
         } else {
           inboxDispatch({
@@ -171,40 +169,27 @@ export const InboxProvider = ({ children }) => {
   }, [category, isRegex, page, query, sort]);
 
   async function deleteQuestion(id: string) {
-    const res = await fetcher(`/questions/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    const { response } = await api.deleteQuestion(id);
 
-    if (res.ok) {
+    if (response.ok) {
       inboxDispatch({ type: InboxActions.RemoveQuestion, payload: { id } });
     }
     // should handle errors ^_^
   }
 
   async function answerQuestion(id: string, answer: string) {
-    const res = await fetcher(`/questions/${id}/answer`, {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answer }),
-    });
+    const { response } = await api.answerQuestion(id, answer);
 
-    if (res.ok) {
+    if (response.ok) {
       inboxDispatch({ type: InboxActions.RemoveQuestion, payload: { id } });
     }
     // should handle errors ^_^
   }
 
   async function changeQuestionCategory(id: string, category: string) {
-    const res = await fetcher(`/questions/${id}/category`, {
-      headers: { "Content-Type": "application/json" },
-      method: "PUT",
-      credentials: "include",
-      body: JSON.stringify({ category }),
-    });
+    const { response } = await api.changeQuestionCategory(id, category);
 
-    if (res.ok) {
+    if (response.ok) {
       inboxDispatch({
         type: InboxActions.UpdateQuestion,
         payload: { id, update: { category } },

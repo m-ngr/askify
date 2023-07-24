@@ -13,8 +13,8 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { ChangeEvent, FormEvent, useContext, useEffect, useState } from "react";
 import { IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { fetcher } from "../utils/fetcher";
 import { UserContext, UserActions } from "../contexts/UserContext";
+import { api } from "../api";
 
 interface LoginForm {
   login: string;
@@ -41,19 +41,12 @@ export default function Login() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const info = {
-      login: String(data.get("login")).trim(),
-      password: String(data.get("password")).trim(),
-      remember: Boolean(data.get("remember")),
-    };
-    const response = await fetcher("/users/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(info),
-      credentials: "include",
-    });
 
-    const json = await response.json();
+    const login = String(data.get("login")).trim();
+    const password = String(data.get("password")).trim();
+    const remember = Boolean(data.get("remember"));
+
+    const { response, data: json } = await api.login(login, password, remember);
 
     if (!response.ok) {
       if (response.status >= 500) {

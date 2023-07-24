@@ -36,9 +36,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import { UserContext } from "../contexts/UserContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { TransitionProps } from "@mui/material/transitions";
-import { fetcher } from "../utils/fetcher";
 
 import dateToDuration from "../utils/dateToDuration";
+import { api } from "../api";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -78,12 +78,8 @@ export default function Question() {
 
   const handleDeleteQuestion = async () => {
     closeDeleteQuestion();
-    const res = await fetcher(`/questions/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.ok) navigate("/");
+    const { response } = await api.deleteQuestion(id ?? "");
+    if (response.ok) navigate("/");
   };
 
   const openMoveMenu = () => setMoveMenuOpen(true);
@@ -92,14 +88,9 @@ export default function Question() {
 
   const handleCategorySelect = async (category: string) => {
     closeMoveMenu();
-    const res = await fetcher(`/questions/${id}/category`, {
-      headers: { "Content-Type": "application/json" },
-      method: "PUT",
-      credentials: "include",
-      body: JSON.stringify({ category }),
-    });
+    const { response } = await api.changeQuestionCategory(id ?? "", category);
 
-    if (res.ok) {
+    if (response.ok) {
       const cat = user?.categories.find((cat) => cat.id === category) ?? {
         id: "",
         name: "general",
@@ -114,12 +105,8 @@ export default function Question() {
 
   const handleDeleteAnswer = async () => {
     closeDeleteQuestion();
-    const res = await fetcher(`/questions/${id}/answer`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.ok) navigate("/");
+    const { response } = await api.deleteAnswer(id ?? "");
+    if (response.ok) navigate("/");
   };
 
   const openAnswerDialog = () => setAnswerDialogOpen(true);
@@ -128,14 +115,8 @@ export default function Question() {
 
   const handleAnswerSubmit = async () => {
     setAnswerDialogOpen(false);
-    const res = await fetcher(`/questions/${id}/answer`, {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ answer: userAnswer }),
-    });
-
-    if (res.ok) {
+    const { response } = await api.answerQuestion(id ?? "", userAnswer);
+    if (response.ok) {
       setQuestion((q) => ({ ...q, answer: userAnswer }));
     }
   };
@@ -146,12 +127,8 @@ export default function Question() {
 
   const handleDeleteComment = async (id) => {
     closeDeleteComment();
-    const res = await fetcher(`/comments/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (res.ok) {
+    const { response } = await api.deleteComment(id);
+    if (response.ok) {
       setComments((cmts) => cmts.filter((cmt) => cmt.id !== id));
     }
   };
@@ -164,14 +141,9 @@ export default function Question() {
 
   const handleCommentEdit = async (id) => {
     setCommentDialogOpen(false);
-    const res = await fetcher(`/comments/${id}`, {
-      method: "PATCH",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: editComment }),
-    });
+    const { response } = await api.editComment(id, editComment);
 
-    if (res.ok) {
+    if (response.ok) {
       setComments((cmts) =>
         cmts.map((cmt) => {
           if (cmt.id === id) {
@@ -189,21 +161,19 @@ export default function Question() {
     setQuestion({});
 
     async function fetchQuestion() {
-      const res = await fetcher(`/questions/${id}`);
-      const json = await res.json();
-      if (res.ok) {
-        setQuestion(json);
-        setUserAnswer(json.answer);
+      const { response, data } = await api.getQuestion(id ?? "");
+      if (response.ok) {
+        setQuestion(data);
+        setUserAnswer(data.answer);
       } else {
-        setError(json.error);
+        setError(data.error);
       }
     }
 
     async function fetchComments() {
-      const res = await fetcher(`/questions/${id}/comments`);
-      const json = await res.json();
-      if (res.ok) {
-        setComments(json);
+      const { response, data } = await api.getComments(id ?? "");
+      if (response.ok) {
+        setComments(data);
       }
     }
 
@@ -212,14 +182,10 @@ export default function Question() {
   }, [id]);
 
   const fetchLiked = useCallback(async () => {
-    const res = await fetcher(`/questions/${id}/likes`, {
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    });
-    const json = await res.json();
-    if (res.ok) {
-      setLiked(json.liked);
-      setQuestion((q) => ({ ...q, likes: json.likes }));
+    const { response, data } = await api.isLiked(id ?? "");
+    if (response.ok) {
+      setLiked(data.liked);
+      setQuestion((q) => ({ ...q, likes: data.likes }));
     }
   }, [id]);
 
@@ -229,16 +195,10 @@ export default function Question() {
 
   async function switchLike() {
     // if (viewer === "visitor") return;
-    const method = liked ? "DELETE" : "POST";
+    const request = liked ? api.unlikeAnswer : api.likeAnswer;
     setLiked((prev) => !prev);
     setQuestion((q) => ({ ...q, likes: question.likes + (liked ? -1 : 1) }));
-
-    await fetcher(`/questions/${id}/likes`, {
-      method,
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    });
-
+    await request(id ?? "");
     fetchLiked();
   }
 
@@ -252,18 +212,13 @@ export default function Question() {
     e.preventDefault();
     // if (viewer === "visitor") return;
     async function postComment() {
-      const res = await fetcher(`/questions/${id}/comments`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: userComment }),
-      });
+      const { response } = await api.addComment(id ?? "", userComment);
 
       setUserComment("");
 
-      if (res.ok) {
+      if (response.ok) {
         setQuestion((q) => ({ ...q, comments: question.comments + 1 }));
-        const json = await res.json();
+        const json = await response.json();
         setComments((cmts) => [...cmts, { ...json, user }]);
       }
     }
