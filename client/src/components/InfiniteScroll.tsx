@@ -1,3 +1,4 @@
+import { CircularProgress, Button, Typography } from "@mui/material";
 import { ReactNode, useEffect, useRef } from "react";
 
 interface InfiniteScrollProps {
@@ -10,14 +11,26 @@ interface InfiniteScrollProps {
   endElement?: ReactNode;
 }
 
+const defaultLoadingElement = <CircularProgress />;
+const defaultLoadMoreElement = (
+  <Button variant="text" color="primary" sx={{ mt: 2 }}>
+    Load More
+  </Button>
+);
+const defaultEndElement = (
+  <Typography variant="subtitle1" color="GrayText">
+    No More Content
+  </Typography>
+);
+
 export default function InfiniteScroll({
   children,
   fetchMore,
   loading,
   hasMore,
-  loadingElement,
-  loadMoreElement,
-  endElement,
+  loadingElement = defaultLoadingElement,
+  loadMoreElement = defaultLoadMoreElement,
+  endElement = defaultEndElement,
 }: InfiniteScrollProps) {
   const observerElement = useRef<HTMLDivElement>(null);
 

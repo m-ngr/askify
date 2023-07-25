@@ -6,8 +6,6 @@ import {
   Avatar,
   Tabs,
   Tab,
-  Button,
-  CircularProgress,
   Container,
   FormControl,
   Grid,
@@ -163,17 +161,6 @@ function ProfilePage() {
           loading={loading}
           hasMore={hasMore}
           fetchMore={fetchNext}
-          loadingElement={<CircularProgress />}
-          loadMoreElement={
-            <Button variant="contained" color="primary" sx={{ mt: 2 }}>
-              Load More
-            </Button>
-          }
-          endElement={
-            <Typography variant="subtitle1" color="GrayText">
-              No More Content
-            </Typography>
-          }
         >
           <QuestionList data={questions} view="profile" viewer={viewer} />
         </InfiniteScroll>

@@ -9,8 +9,6 @@ import {
   Grid,
   Tab,
   Tabs,
-  CircularProgress,
-  Button,
 } from "@mui/material";
 import { UserContext } from "../contexts/UserContext";
 import QuestionList from "../components/QuestionList";
@@ -107,22 +105,7 @@ function InboxPage() {
         ))}
       </Tabs>
 
-      <InfiniteScroll
-        loading={loading}
-        hasMore={hasMore}
-        fetchMore={fetchNext}
-        loadingElement={<CircularProgress />}
-        loadMoreElement={
-          <Button variant="contained" color="primary" sx={{ mt: 2 }}>
-            Load More
-          </Button>
-        }
-        endElement={
-          <Typography variant="subtitle1" color="GrayText">
-            No More Content
-          </Typography>
-        }
-      >
+      <InfiniteScroll loading={loading} hasMore={hasMore} fetchMore={fetchNext}>
         <QuestionList data={questions} view="inbox" viewer="owner" />
       </InfiniteScroll>
     </Container>
