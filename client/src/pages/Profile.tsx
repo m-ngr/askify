@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Search as SearchIcon } from "@mui/icons-material";
 import {
   Box,
   Typography,
@@ -11,14 +10,10 @@ import {
   CircularProgress,
   Container,
   FormControl,
-  FormControlLabel,
   Grid,
-  IconButton,
   InputLabel,
   MenuItem,
   Select,
-  Switch,
-  TextField,
 } from "@mui/material";
 import { UserContext } from "../contexts/UserContext";
 import AskForm from "../components/AskForm";
@@ -28,35 +23,30 @@ import ProfileProvider, {
   ProfileContext,
 } from "../contexts/ProfileContext";
 import InfiniteScroll from "../components/InfiniteScroll";
+import SearchBar from "../components/SearchBar";
 
 function ProfilePage() {
   const { user } = useContext(UserContext);
-  const [text, setText] = useState("");
   const [viewer, setViewer] = useState<Viewer>("visitor");
   const { profile, profileDispatch } = useContext(ProfileContext);
-  const { sort, category, isRegex, questions, loading, hasMore } = profile;
+  const { sort, category, questions, loading, hasMore } = profile;
 
   // on change handlers
-  const changeText = (e) => setText(e.target.value);
 
-  function changeQuery() {
+  function handleSearch(query: string, isRegex: boolean) {
     profileDispatch({
       type: ProfileActions.Update,
-      payload: { query: text, page: 1 },
+      payload: { query, isRegex, page: 1 },
     });
   }
+
   const changeSort = (e) => {
     profileDispatch({
       type: ProfileActions.Update,
       payload: { sort: e.target.value, page: 1 },
     });
   };
-  const changeRegex = (e) => {
-    profileDispatch({
-      type: ProfileActions.Update,
-      payload: { isRegex: e.target.checked, page: 1 },
-    });
-  };
+
   const changeCategory = (e, cat) => {
     profileDispatch({
       type: ProfileActions.Update,
@@ -131,36 +121,12 @@ function ProfilePage() {
           Answers
         </Typography>
 
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={2} gap={1}>
           <Grid item xs>
-            <Box display="flex" alignItems="center">
-              <TextField
-                label="Search"
-                fullWidth
-                value={text}
-                onChange={changeText}
-                sx={{ minWidth: "220px" }}
-              />
-              <IconButton color="primary" onClick={changeQuery}>
-                <SearchIcon />
-              </IconButton>
-            </Box>
+            <SearchBar onSearch={handleSearch} />
           </Grid>
 
-          <Grid item xs={12} sm={2} md={2}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isRegex}
-                  onChange={changeRegex}
-                  color="primary"
-                />
-              }
-              label="Regex"
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={4} md={2}>
+          <Grid item xs={12} sm={3} md={2}>
             <FormControl fullWidth>
               <InputLabel id="sort-by-label">Sort By</InputLabel>
               <Select
