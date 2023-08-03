@@ -7,7 +7,7 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Link from "@mui/material/Link";
 import { useContext } from "react";
 import { UserActions, UserContext } from "../contexts/UserContext";
-import { api } from "../api";
+import { api } from "../utils/api";
 
 export default function Navbar() {
   const { user, userDispatch } = useContext(UserContext);

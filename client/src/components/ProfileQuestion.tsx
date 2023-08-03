@@ -33,7 +33,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { TransitionProps } from "@mui/material/transitions";
 import { ProfileActions, ProfileContext } from "../contexts/ProfileContext";
 import { Viewer } from "./QuestionList";
-import { api } from "../api";
+import { api } from "../utils/api";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {

@@ -1,5 +1,5 @@
 import { createContext, useEffect, useReducer } from "react";
-import { api } from "../api";
+import { api } from "../utils/api";
 
 interface Inbox {
   query: string;

@@ -14,7 +14,7 @@ import { ChangeEvent, FormEvent, useContext, useEffect, useState } from "react";
 import { IconButton, InputAdornment } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { UserContext, UserActions } from "../contexts/UserContext";
-import { api } from "../api";
+import { api } from "../utils/api";
 
 interface LoginForm {
   login: string;

@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 
 import { FormEvent, useState } from "react";
-import { api } from "../api";
+import { api } from "../utils/api";
 
 interface AskFormProps {
   handle: string;
