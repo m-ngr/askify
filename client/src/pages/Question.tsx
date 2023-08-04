@@ -38,7 +38,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { TransitionProps } from "@mui/material/transitions";
 
 import dateToDuration from "../utils/dateToDuration";
-import { api } from "../api";
+import { api } from "../utils/api";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {

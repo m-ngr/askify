@@ -12,7 +12,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link as RouterLink } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
-import { api } from "../api";
+import { api } from "../utils/api";
 
 interface SignupForm {
   firstName: string;
