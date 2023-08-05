@@ -1,4 +1,4 @@
-import { createContext, useEffect, useReducer } from "react";
+import { createContext, useEffect, useReducer, useState } from "react";
 import { api } from "../utils/api";
 
 interface User {
@@ -46,20 +46,24 @@ const userReducer = (state: State, action: Action): State => {
 
 export const UserContext = createContext<{
   user: State;
+  userLoading: boolean;
   userDispatch: React.Dispatch<Action>;
 }>({
   user: null,
+  userLoading: true,
   userDispatch: () => {},
 });
 
 export const UserProvider = ({ children }) => {
   const [user, userDispatch] = useReducer(userReducer, null);
+  const [userLoading, setUserLoading] = useState(true);
 
   useEffect(() => {
     async function loadUser() {
       const { response, data } = await api.loadUser();
       if (response.ok)
         userDispatch({ type: UserActions.Update, payload: data });
+      setUserLoading(false);
     }
 
     async function loadCats() {
@@ -68,12 +72,16 @@ export const UserProvider = ({ children }) => {
         userDispatch({ type: UserActions.Update, payload: data });
     }
 
-    loadUser();
-    loadCats();
+    try {
+      loadUser();
+      loadCats();
+    } catch {
+      setUserLoading(false);
+    }
   }, [userDispatch]);
 
   return (
-    <UserContext.Provider value={{ user, userDispatch }}>
+    <UserContext.Provider value={{ user, userLoading, userDispatch }}>
       {children}
     </UserContext.Provider>
   );

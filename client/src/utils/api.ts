@@ -230,4 +230,16 @@ export const api = {
 
     return { response, data };
   },
+
+  async updateUser(patch) {
+    const response = await fetcher("/users/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(patch),
+    });
+    const data = await response.json();
+
+    return { response, data };
+  },
 };

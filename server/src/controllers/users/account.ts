@@ -76,27 +76,30 @@ export async function updateInfo(
       bio: req.body.bio,
     };
     const allowAnonymous = req.body.allowAnonymous;
-    const errors: any[] = [];
+    const errors: Record<string, string> = {};
     const modified = {};
 
     for (const field in batch) {
-      if (batch[field]) {
+      if (typeof batch[field] === "string") {
         const { success, message } = await user.setField(field, batch[field]);
-        if (!success) {
-          errors.push({ field, message });
+        if (!success) errors[field] = message;
+
+        if (user.isModified(field)) {
+          modified[field] = batch[field];
         }
-        modified[field] = user.isModified(field);
       }
     }
 
     if (typeof allowAnonymous === "boolean") {
       user.allowAnonymous = allowAnonymous;
-      modified["allowAnonymous"] = user.isModified("allowAnonymous");
+      if (user.isModified("allowAnonymous")) {
+        modified["allowAnonymous"] = allowAnonymous;
+      }
     }
 
     await user.save();
 
-    res.json({ errors, modified, user });
+    res.json({ errors, modified });
   } catch (error) {
     next(error);
   }
