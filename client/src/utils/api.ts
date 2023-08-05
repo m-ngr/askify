@@ -8,6 +8,11 @@ function fetcher(path: string, options?: RequestInit) {
   return fetch(apiUrl + path, options);
 }
 
+/** @REFACTOR:
+ * - typing inputs/outputs
+ * - handle errors systematically
+ * - split into files
+ */
 export const api = {
   async askQuestion(userHandle: string, body) {
     const response = await fetcher(`/users/${userHandle}/questions`, {
@@ -237,6 +242,41 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(patch),
+    });
+    const data = await response.json();
+
+    return { response, data };
+  },
+
+  async addCategory(category: string) {
+    const response = await fetcher("/users/me/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ category }),
+    });
+    const data = await response.json();
+
+    return { response, data };
+  },
+
+  async renameCategory(id: string, category: string) {
+    const response = await fetcher(`/users/me/categories/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ category }),
+    });
+    const data = await response.json();
+
+    return { response, data };
+  },
+
+  async deleteCategory(id: string) {
+    const response = await fetcher(`/users/me/categories/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
     });
     const data = await response.json();
 
