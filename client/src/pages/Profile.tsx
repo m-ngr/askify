@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import {
   Box,
   Typography,
-  Avatar,
   Tabs,
   Tab,
   Container,
@@ -22,6 +21,7 @@ import ProfileProvider, {
 } from "../contexts/ProfileContext";
 import InfiniteScroll from "../components/InfiniteScroll";
 import SearchBar from "../components/SearchBar";
+import ProfileHeader from "../components/ProfileHeader";
 
 function ProfilePage() {
   const { user } = useContext(UserContext);
@@ -75,27 +75,7 @@ function ProfilePage() {
         paddingY: "10px",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: "20px" }}>
-        <Avatar
-          src={profile.user?.avatar}
-          alt={`${profile.user?.firstName} Avatar`}
-          sx={{ width: 80, height: 80 }}
-        />
-
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="h6">
-            {profile.user?.firstName + " " + profile.user?.lastName}
-          </Typography>
-
-          <Typography variant="subtitle1" color="text.secondary">
-            @{profile.user?.username}
-          </Typography>
-        </Box>
-      </Box>
-
-      <Box sx={{ paddingLeft: "20px", paddingRight: "20px" }}>
-        <Typography variant="body1">{profile.user?.bio}</Typography>
-      </Box>
+      <ProfileHeader profile={profile} />
 
       {user && profile.user && (
         <AskForm

@@ -5,6 +5,7 @@ import Question from "../../models/Question";
 import Category from "../../models/Category";
 import Like from "../../models/Like";
 import Comment from "../../models/Comment";
+import config from "../../config";
 
 export function getInfo(req: Request, res: Response, next: NextFunction) {
   try {
@@ -54,6 +55,7 @@ export async function deleteAccount(
 
     user.deleteOne();
 
+    res.clearCookie("token", config.cookieOptions());
     return res.sendStatus(204);
   } catch (error) {
     next(error);
@@ -76,27 +78,30 @@ export async function updateInfo(
       bio: req.body.bio,
     };
     const allowAnonymous = req.body.allowAnonymous;
-    const errors: any[] = [];
+    const errors: Record<string, string> = {};
     const modified = {};
 
     for (const field in batch) {
-      if (batch[field]) {
+      if (typeof batch[field] === "string") {
         const { success, message } = await user.setField(field, batch[field]);
-        if (!success) {
-          errors.push({ field, message });
+        if (!success) errors[field] = message;
+
+        if (user.isModified(field)) {
+          modified[field] = batch[field];
         }
-        modified[field] = user.isModified(field);
       }
     }
 
     if (typeof allowAnonymous === "boolean") {
       user.allowAnonymous = allowAnonymous;
-      modified["allowAnonymous"] = user.isModified("allowAnonymous");
+      if (user.isModified("allowAnonymous")) {
+        modified["allowAnonymous"] = allowAnonymous;
+      }
     }
 
     await user.save();
 
-    res.json({ errors, modified, user });
+    res.json({ errors, modified });
   } catch (error) {
     next(error);
   }
@@ -124,6 +129,25 @@ export async function updatePassword(
 
     await user.save();
     res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function checkPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const password = String(req.body.password);
+    const user = req.user!;
+
+    if (!(await user.comparePassword(password))) {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+
+    res.json({ message: "Correct password" });
   } catch (error) {
     next(error);
   }
