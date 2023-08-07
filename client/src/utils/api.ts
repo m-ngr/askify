@@ -282,4 +282,51 @@ export const api = {
 
     return { response, data };
   },
+
+  async checkPassword(password: string) {
+    const response = await fetcher("/users/me/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ password }),
+    });
+
+    if (response.status === 200) return true;
+    return false;
+  },
+
+  async changeEmail(newEmail: string, password: string) {
+    const response = await fetcher("/users/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: newEmail }),
+    });
+    const data = await response.json();
+
+    return { response, data };
+  },
+
+  async changePassword(newPassword: string, oldPassword: string) {
+    const response = await fetcher("/users/me/password", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ oldPassword, password: newPassword }),
+    });
+    const data = await response.json();
+
+    return { response, data };
+  },
+
+  async deleteAccount(password: string) {
+    const response = await fetcher("/users/me", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ password }),
+    });
+
+    return { response };
+  },
 };

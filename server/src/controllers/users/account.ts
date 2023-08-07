@@ -5,6 +5,7 @@ import Question from "../../models/Question";
 import Category from "../../models/Category";
 import Like from "../../models/Like";
 import Comment from "../../models/Comment";
+import config from "../../config";
 
 export function getInfo(req: Request, res: Response, next: NextFunction) {
   try {
@@ -54,6 +55,7 @@ export async function deleteAccount(
 
     user.deleteOne();
 
+    res.clearCookie("token", config.cookieOptions());
     return res.sendStatus(204);
   } catch (error) {
     next(error);
@@ -127,6 +129,25 @@ export async function updatePassword(
 
     await user.save();
     res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function checkPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const password = String(req.body.password);
+    const user = req.user!;
+
+    if (!(await user.comparePassword(password))) {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+
+    res.json({ message: "Correct password" });
   } catch (error) {
     next(error);
   }

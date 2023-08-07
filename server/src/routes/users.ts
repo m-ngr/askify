@@ -18,6 +18,7 @@ router.post("/logout", controller.logout);
 router.patch("/me", controller.updateInfo);
 router.delete("/me", controller.deleteAccount);
 router.put("/me/password", controller.updatePassword);
+router.post("/me/password", controller.checkPassword);
 router.get("/me/inbox", controller.getInbox);
 
 router.get("/me/categories", controller.getCategories);

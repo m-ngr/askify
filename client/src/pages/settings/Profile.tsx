@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
-import { useNavigate } from "react-router-dom";
 import { UserActions, UserContext } from "../../contexts/UserContext";
 import { api } from "../../utils/api";
 
@@ -41,24 +40,19 @@ export default function ProfileSettings() {
   const [values, setValues] = useState<ProfileForm>(initValues);
   const [errors, setErrors] = useState<Partial<ProfileForm>>({});
   const { user, userLoading, userDispatch } = useContext(UserContext);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!userLoading) {
-      if (!user) {
-        navigate("/login");
-      } else {
-        setValues({
-          firstName: user.firstName,
-          lastName: user.lastName,
-          username: user.username,
-          avatar: user.avatar,
-          bio: user.bio,
-        });
-        setAllowAnonymous(user.allowAnonymous);
-      }
+    if (!userLoading && user) {
+      setValues({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        avatar: user.avatar ?? "",
+        bio: user.bio ?? "",
+      });
+      setAllowAnonymous(user.allowAnonymous);
     }
-  }, [user, navigate, userLoading]);
+  }, [user, userLoading]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
