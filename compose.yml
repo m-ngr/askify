@@ -1,0 +1,13 @@
+services:
+  server:
+    image: node:20
+    container_name: server
+    working_dir: /app
+    volumes:
+      - ./server:/app
+    ports:
+      - 3000:3000
+    environment:
+      PORT: 3000
+    restart: unless-stopped
+    command: bash -c "npm run start:dev"
