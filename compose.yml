@@ -9,5 +9,30 @@ services:
       - 3000:3000
     environment:
       PORT: 3000
+    depends_on:
+      - postgres
     restart: unless-stopped
     command: bash -c "npm run start:dev"
+  
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  postgres-dashboard:
+    image: adminer
+    container_name: postgres-dashboard
+    ports:
+      - "3003:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres-data: 
