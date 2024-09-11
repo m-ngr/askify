@@ -2,19 +2,17 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigService } from './config.service';
+import { DatabaseConfigService } from './config/database.config.service';
+import { ConfigModule } from './config/config.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: 'pgsql://root:root@postgres:5432/test',
-      autoLoadEntities: true,
-      synchronize: true,
+    ConfigModule,
+    TypeOrmModule.forRootAsync({
+      useClass: DatabaseConfigService,
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, ConfigService],
-  exports: [ConfigService],
+  providers: [AppService],
 })
 export class AppModule {}
