@@ -1,10 +1,10 @@
 import {
-  BadRequestException,
   Injectable,
   ValidationError,
   ValidationPipe,
   ValidationPipeOptions,
 } from '@nestjs/common';
+import { BodyException } from '../utils/standard-exceptions';
 
 const DEFAULT_OPTIONS: ValidationPipeOptions = {
   transform: true,
@@ -23,6 +23,6 @@ export class StandardValidationPipe extends ValidationPipe {
       return acc;
     }, {});
 
-    return new BadRequestException({ errors });
+    return new BodyException(errors, 400);
   };
 }
