@@ -5,10 +5,12 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { DtoType } from 'src/common/decorators/dto-type.decorator';
 import { IsPassword } from 'src/common/decorators/password.decorator';
 import { StringTransform } from 'src/common/decorators/string-transform.decorator';
 import { IsUsername } from 'src/common/decorators/username.decorator';
 
+@DtoType('body')
 export class CreateUserDto {
   @IsUsername()
   username: string;

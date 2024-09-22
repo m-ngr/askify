@@ -39,5 +39,7 @@
 
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateUserDto } from './create-user.dto';
+import { DtoType } from 'src/common/decorators/dto-type.decorator';
 
+@DtoType('body')
 export class UpdateUserDto extends PartialType(CreateUserDto) {}
