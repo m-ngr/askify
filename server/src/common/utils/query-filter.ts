@@ -1,9 +1,19 @@
-import { FindOptionsWhere, ILike } from 'typeorm';
+import {
+  Between,
+  FindOptionsWhere,
+  ILike,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+} from 'typeorm';
 import { Filterable } from '../decorators/tags.decorator';
+import { DateRange } from '../decorators/date-range.decorator';
 
-export function createQueryFilter<T>(query: object) {
+export function createQueryFilter<T>(query: object, useFilerable = false) {
   const where: FindOptionsWhere<T> = {};
-  const filters = Filterable.getProperties(query.constructor);
+
+  const filters = useFilerable
+    ? Filterable.getProperties(query.constructor)
+    : Object.keys(query);
 
   for (const key of filters) {
     let value = query[key];
@@ -12,9 +22,29 @@ export function createQueryFilter<T>(query: object) {
     if (typeof value === 'string') {
       value = toILikePattern(value);
       if (value) where[key] = ILike(value);
+    } else if (value instanceof DateRange) {
+      setDateRangeQuery(where, key, value);
     } else {
       where[key] = value;
     }
+  }
+
+  return where;
+}
+
+function setDateRangeQuery<T>(
+  where: FindOptionsWhere<T>,
+  field: string,
+  dateRange: DateRange,
+) {
+  if (dateRange.from && dateRange.to) {
+    where[field] = Between(dateRange.from, dateRange.to);
+  } else if (dateRange.from) {
+    where[field] = MoreThanOrEqual(dateRange.from);
+  } else if (dateRange.to) {
+    where[field] = LessThanOrEqual(dateRange.to);
+  } else if (dateRange.dateFromDays) {
+    where[field] = MoreThanOrEqual(dateRange.dateFromDays);
   }
 
   return where;
