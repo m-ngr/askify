@@ -7,6 +7,11 @@ import { Not, Repository } from 'typeorm';
 import { throwIfDuplicate } from 'src/common/utils/common';
 import { secureHasher } from 'src/common/utils/securtiy-hasher';
 import { ParamException } from 'src/common/utils/standard-exceptions';
+import { paginate, Pagination } from 'nestjs-typeorm-paginate';
+import { createQueryFilter } from 'src/common/utils/query-filter';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { FilterUserDto } from './dto/filter-user.dto';
+import { Sort } from 'src/common/utils/sort';
 
 @Injectable()
 export class UsersService {
@@ -33,8 +38,15 @@ export class UsersService {
     return await this.usersRepository.save(user);
   }
 
-  async findAll() {
-    return await this.usersRepository.find();
+  async findAll(
+    filter: FilterUserDto,
+    pagination: PaginationDto,
+    sort: Sort,
+  ): Promise<Pagination<User>> {
+    return paginate<User>(this.usersRepository, pagination, {
+      where: createQueryFilter<User>(filter),
+      order: sort.sortOrder,
+    });
   }
 
   async findOne(id: string) {
