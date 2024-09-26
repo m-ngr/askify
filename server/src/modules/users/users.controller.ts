@@ -15,8 +15,9 @@ import { UUIDParam } from 'src/common/decorators/uuid-param.decorator';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { FilterUserDto } from './dto/filter-user.dto';
 import { User } from './entities/user.entity';
-import { SortArgs } from 'src/common/decorators/sort-args.decorator';
+import { Arg } from 'src/common/decorators/arg.decorator';
 import { Sort } from 'src/common/utils/sort';
+import { Select } from 'src/common/utils/select';
 
 @Controller('users')
 export class UsersController {
@@ -31,9 +32,10 @@ export class UsersController {
   findAll(
     @Query() filter: FilterUserDto,
     @Query() pagination: PaginationDto,
-    @SortArgs(User, 'query') sort: Sort,
+    @Arg('query', Sort, User) sort: Sort,
+    @Arg('query', Select, User) select: Select,
   ) {
-    return this.usersService.findAll(filter, pagination, sort);
+    return this.usersService.findAll(filter, pagination, sort, select);
   }
 
   @Get(':id')

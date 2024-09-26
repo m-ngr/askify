@@ -1,4 +1,3 @@
-import { getMetadataArgsStorage } from 'typeorm';
 import { BodyException } from './standard-exceptions';
 
 export function throwIfDuplicate(
@@ -16,12 +15,4 @@ export function throwIfDuplicate(
   }
 
   if (willThrow) throw new BodyException(errors, 409);
-}
-
-export function getEntityFields(entity: Function): string[] {
-  const entityMetadata = getMetadataArgsStorage();
-  const columns = entityMetadata.columns.filter(
-    (column) => column.target === entity && column.options.select !== false,
-  );
-  return columns.map((column) => column.propertyName);
 }

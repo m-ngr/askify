@@ -12,6 +12,7 @@ import { createQueryFilter } from 'src/common/utils/query-filter';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { FilterUserDto } from './dto/filter-user.dto';
 import { Sort } from 'src/common/utils/sort';
+import { Select } from 'src/common/utils/select';
 
 @Injectable()
 export class UsersService {
@@ -42,10 +43,12 @@ export class UsersService {
     filter: FilterUserDto,
     pagination: PaginationDto,
     sort: Sort,
+    select: Select,
   ): Promise<Pagination<User>> {
     return paginate<User>(this.usersRepository, pagination, {
       where: createQueryFilter<User>(filter),
-      order: sort.sortOrder,
+      select: select.value,
+      order: sort.value,
     });
   }
 
