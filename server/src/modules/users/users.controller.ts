@@ -18,6 +18,7 @@ import { User } from './entities/user.entity';
 import { Arg } from 'src/common/decorators/arg.decorator';
 import { Sort } from 'src/common/utils/sort';
 import { Select } from 'src/common/utils/select';
+import { SearchDto } from 'src/common/dto/search.dto';
 
 @Controller('users')
 export class UsersController {
@@ -31,11 +32,12 @@ export class UsersController {
   @Get()
   findAll(
     @Query() filter: FilterUserDto,
+    @Query() search: SearchDto,
     @Query() pagination: PaginationDto,
     @Arg('query', Sort, User) sort: Sort,
     @Arg('query', Select, User) select: Select,
   ) {
-    return this.usersService.findAll(filter, pagination, sort, select);
+    return this.usersService.findAll(filter, search, pagination, sort, select);
   }
 
   @Get(':id')

@@ -5,6 +5,7 @@ import {
 } from 'class-validator';
 
 export const Filterable = createTag('filterable');
+export const Searchable = createTag('searchable');
 
 export function createTag(tagName: string) {
   function decorator(validationOptions?: ValidationOptions) {

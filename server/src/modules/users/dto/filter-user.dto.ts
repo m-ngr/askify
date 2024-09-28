@@ -6,23 +6,28 @@ import {
   IsDateRange,
 } from 'src/common/decorators/date-range.decorator';
 import { DtoType } from 'src/common/decorators/dto-type.decorator';
+import { Searchable } from 'src/common/decorators/tags.decorator';
 
 @DtoType('query')
 export class FilterUserDto {
   @IsOptional()
   @IsString()
+  @Searchable()
   username?: string;
 
   @IsOptional()
   @IsString()
+  @Searchable()
   email?: string;
 
   @IsOptional()
   @IsString()
+  @Searchable()
   name?: string;
 
   @IsOptional()
   @IsString()
+  @Searchable()
   bio?: string;
 
   @IsOptional()

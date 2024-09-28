@@ -5,10 +5,22 @@ import {
   LessThanOrEqual,
   MoreThanOrEqual,
 } from 'typeorm';
-import { Filterable } from '../decorators/tags.decorator';
+import { Filterable, Searchable } from '../decorators/tags.decorator';
 import { DateRange } from '../decorators/date-range.decorator';
 
-export function createQueryFilter<T>(query: object, useFilerable = false) {
+export function buildFilterQuery<T>(
+  query: object,
+  search?: string,
+  useFilerable = false,
+): FindOptionsWhere<T>[] {
+  const filter = createFilterQuery(query, useFilerable);
+  if (!search) return [filter];
+  const fields = Searchable.getProperties(query.constructor);
+  search = toILikePattern(search);
+  return fields.map((f) => ({ [f]: ILike(search), ...filter }));
+}
+
+function createFilterQuery<T>(query: object, useFilerable = false) {
   const where: FindOptionsWhere<T> = {};
 
   const filters = useFilerable

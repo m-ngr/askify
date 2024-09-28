@@ -8,11 +8,12 @@ import { throwIfDuplicate } from 'src/common/utils/common';
 import { secureHasher } from 'src/common/utils/securtiy-hasher';
 import { ParamException } from 'src/common/utils/standard-exceptions';
 import { paginate, Pagination } from 'nestjs-typeorm-paginate';
-import { createQueryFilter } from 'src/common/utils/query-filter';
+import { buildFilterQuery } from 'src/common/utils/query-filter';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { FilterUserDto } from './dto/filter-user.dto';
 import { Sort } from 'src/common/utils/sort';
 import { Select } from 'src/common/utils/select';
+import { SearchDto } from 'src/common/dto/search.dto';
 
 @Injectable()
 export class UsersService {
@@ -41,12 +42,13 @@ export class UsersService {
 
   async findAll(
     filter: FilterUserDto,
+    search: SearchDto,
     pagination: PaginationDto,
     sort: Sort,
     select: Select,
   ): Promise<Pagination<User>> {
     return paginate<User>(this.usersRepository, pagination, {
-      where: createQueryFilter<User>(filter),
+      where: buildFilterQuery<User>(filter, search.search),
       select: select.value,
       order: sort.value,
     });
