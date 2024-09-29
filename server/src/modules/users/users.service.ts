@@ -60,6 +60,15 @@ export class UsersService {
     return user;
   }
 
+  async getUser(login: string): Promise<User | undefined> {
+    const user = await this.usersRepository.findOne({
+      where: [{ username: login }, { email: login }],
+      select: ['id', 'password'],
+    });
+    if (!user) return undefined;
+    return user;
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     await this.findOne(id); // Check if user exists
 

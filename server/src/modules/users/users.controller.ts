@@ -19,6 +19,7 @@ import { Arg } from 'src/common/decorators/arg.decorator';
 import { Sort } from 'src/common/utils/sort';
 import { Select } from 'src/common/utils/select';
 import { SearchDto } from 'src/common/dto/search.dto';
+import { Public } from '../auth/public.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -30,6 +31,7 @@ export class UsersController {
   }
 
   @Get()
+  @Public()
   findAll(
     @Query() filter: FilterUserDto,
     @Query() search: SearchDto,
