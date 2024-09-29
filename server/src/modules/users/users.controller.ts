@@ -7,6 +7,7 @@ import {
   Delete,
   HttpCode,
   Query,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,6 +21,7 @@ import { Sort } from 'src/common/utils/sort';
 import { Select } from 'src/common/utils/select';
 import { SearchDto } from 'src/common/dto/search.dto';
 import { Public } from '../auth/public.decorator';
+import { AuthUser } from 'src/common/decorators/auth-user.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -32,7 +34,6 @@ export class UsersController {
   }
 
   @Get()
-  @Public()
   findAll(
     @Query() filter: FilterUserDto,
     @Query() search: SearchDto,
@@ -44,18 +45,25 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@UUIDParam('id') id: string) {
+  findOne(@UUIDParam('id') id: string, @AuthUser() user: User) {
+    if (user.id !== id) throw new ForbiddenException();
     return this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  update(@UUIDParam('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @UUIDParam('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @AuthUser() user: User,
+  ) {
+    if (user.id !== id) throw new ForbiddenException();
     return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@UUIDParam('id') id: string) {
+  remove(@UUIDParam('id') id: string, @AuthUser() user: User) {
+    if (user.id !== id) throw new ForbiddenException();
     return this.usersService.remove(id);
   }
 }
